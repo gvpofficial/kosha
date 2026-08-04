@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Create and manage professional invoices — Kosha." />
+    <title>Invoice — Kosha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/invoice.css" />
+</head>
+<body>
+
+    <!-- Layout injected by layout.js -->
+
+    <div class="main-content" id="main-content">
+        <div class="page-content" style="padding-bottom:5rem;">
+
+            <!-- Breadcrumb -->
+            <nav class="kosha-breadcrumb" aria-label="Breadcrumb">
+                <a href="dashboard.html" class="kosha-breadcrumb-item">Home</a>
+                <span class="kosha-breadcrumb-sep">/</span>
+                <a href="invoices.html" class="kosha-breadcrumb-item">Invoices</a>
+                <span class="kosha-breadcrumb-sep">/</span>
+                <span class="kosha-breadcrumb-item active" id="breadcrumb-label">New Invoice</span>
+            </nav>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" id="page-title-display">New Invoice</h1>
+                    <p class="page-subtitle">Fill in the details to create a professional invoice.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="kosha-badge badge-draft" id="save-status-badge"><i class="fa-solid fa-pencil"></i> Draft</span>
+                </div>
+            </div>
+
+            <!-- ══ Two-column editor layout ══ -->
+            <div class="invoice-editor-layout">
+
+                <!-- ──── LEFT: Form ──────────────────────────────── -->
+                <div class="invoice-form-col" id="invoice-form-col">
+
+                    <!-- SECTION 1: Document Settings -->
+                    <div class="invoice-section" id="sec-settings">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-settings')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-sliders"></i> Document Settings</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-3 mb-3">
+                                <div class="col-12">
+                                    <label class="form-label">Document Type</label>
+                                    <div class="doc-type-group" id="doc-type-group" role="group" aria-label="Document type">
+                                        <button class="doc-type-btn active" data-type="invoice">Invoice</button>
+                                        <button class="doc-type-btn" data-type="quotation">Quotation</button>
+                                        <button class="doc-type-btn" data-type="receipt">Receipt</button>
+                                        <button class="doc-type-btn" data-type="proforma">Proforma</button>
+                                        <button class="doc-type-btn" data-type="credit_note">Credit Note</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="invoice-currency">Currency</label>
+                                    <select class="form-select" id="invoice-currency" name="currency">
+                                        <option value="INR|₹">₹ INR — Indian Rupee</option>
+                                        <option value="USD|$">$ USD — US Dollar</option>
+                                        <option value="EUR|€">€ EUR — Euro</option>
+                                        <option value="GBP|£">£ GBP — British Pound</option>
+                                        <option value="AED|AED">AED — UAE Dirham</option>
+                                        <option value="SGD|S$">S$ SGD — Singapore Dollar</option>
+                                        <option value="AUD|A$">A$ AUD — Australian Dollar</option>
+                                        <option value="JPY|¥">¥ JPY — Japanese Yen</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Template</label>
+                                    <div class="template-grid" id="template-grid" role="group" aria-label="Invoice template">
+                                        <div class="template-card active" data-tpl="modern" onclick="setTemplate('modern')">
+                                            <div class="template-preview"><div class="template-preview-header" style="background:linear-gradient(135deg,#3B82F6,#06B6D4);"></div><div class="template-preview-lines"><div class="template-preview-line"></div><div class="template-preview-line short"></div><div class="template-preview-line"></div><div class="template-preview-line short"></div></div></div>
+                                            <div class="template-name">Modern</div>
+                                        </div>
+                                        <div class="template-card" data-tpl="professional" onclick="setTemplate('professional')">
+                                            <div class="template-preview"><div class="template-preview-header" style="background:#fff;border-bottom:4px solid #3B82F6;"></div><div class="template-preview-lines"><div class="template-preview-line"></div><div class="template-preview-line"></div><div class="template-preview-line short"></div></div></div>
+                                            <div class="template-name">Pro</div>
+                                        </div>
+                                        <div class="template-card" data-tpl="minimal" onclick="setTemplate('minimal')">
+                                            <div class="template-preview"><div class="template-preview-header" style="background:#fff;padding:4px;"><div style="font-size:6px;font-weight:800;color:#111;">INVOICE</div></div><div class="template-preview-lines"><div class="template-preview-line"></div><div class="template-preview-line short"></div><div class="template-preview-line"></div></div></div>
+                                            <div class="template-name">Minimal</div>
+                                        </div>
+                                        <div class="template-card" data-tpl="classic" onclick="setTemplate('classic')">
+                                            <div class="template-preview"><div class="template-preview-header" style="background:#fff;border-bottom:3px double #111;display:flex;align-items:center;justify-content:center;"><div style="font-size:6px;font-weight:800;">INVOICE</div></div><div class="template-preview-lines"><div class="template-preview-line"></div><div class="template-preview-line"></div></div></div>
+                                            <div class="template-name">Classic</div>
+                                        </div>
+                                        <div class="template-card" data-tpl="bold" onclick="setTemplate('bold')">
+                                            <div class="template-preview"><div class="template-preview-header" style="background:#111827;"></div><div class="template-preview-lines"><div class="template-preview-line"></div><div class="template-preview-line short"></div><div class="template-preview-line"></div></div></div>
+                                            <div class="template-name">Bold</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Business Details -->
+                    <div class="invoice-section collapsed" id="sec-business">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-business')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-building"></i> Business Details</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation();loadBusinessProfile()" title="Load from saved profile">
+                                    <i class="fa-solid fa-rotate-right"></i> Load Profile
+                                </button>
+                                <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                            </div>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-2">
+                                <div class="col-md-6"><label class="form-label">Business Name<span class="required">*</span></label><input type="text" id="biz-name" name="business_name" class="form-control" placeholder="Your Business Name" /></div>
+                                <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="biz-email" name="business_email" class="form-control" placeholder="business@email.com" /></div>
+                                <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" id="biz-phone" name="business_phone" class="form-control" placeholder="+91 98765 43210" /></div>
+                                <div class="col-md-6"><label class="form-label">GSTIN</label><input type="text" id="biz-gstin" name="business_gstin" class="form-control" placeholder="29ABCDE1234F1Z5" maxlength="15" /></div>
+                                <div class="col-md-6"><label class="form-label">PAN</label><input type="text" id="biz-pan" name="business_pan" class="form-control" placeholder="ABCDE1234F" maxlength="10" /></div>
+                                <div class="col-md-6"><label class="form-label">Website</label><input type="url" id="biz-website" name="business_website" class="form-control" placeholder="https://yourwebsite.com" /></div>
+                                <div class="col-12"><label class="form-label">Address</label><textarea id="biz-address" name="business_address" class="form-control" rows="2" placeholder="Street, City, State, PIN"></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: Customer Details -->
+                    <div class="invoice-section" id="sec-customer">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-customer')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-user-tie"></i> Customer Details</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <label class="form-label">Search Customer</label>
+                                    <div class="autocomplete-wrapper">
+                                        <input type="text" id="customer-search" class="form-control" placeholder="Search by name, email, phone…" autocomplete="off" />
+                                        <div class="autocomplete-dropdown" id="customer-dropdown" role="listbox" aria-label="Customer suggestions"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6"><label class="form-label">Name<span class="required">*</span></label><input type="text" id="cust-name" name="customer_name" class="form-control" placeholder="Customer Name" /></div>
+                                <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="cust-email" name="customer_email" class="form-control" placeholder="customer@email.com" /></div>
+                                <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" id="cust-phone" name="customer_phone" class="form-control" placeholder="+91 98765 43210" /></div>
+                                <div class="col-md-6"><label class="form-label">GSTIN</label><input type="text" id="cust-gstin" name="customer_gstin" class="form-control" placeholder="Customer GSTIN" maxlength="15" /></div>
+                                <div class="col-12"><label class="form-label">Address</label><textarea id="cust-address" name="customer_address" class="form-control" rows="2" placeholder="Customer address"></textarea></div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="save-to-customers" />
+                                        <label class="form-check-label" for="save-to-customers" style="font-size:.8125rem;">
+                                            Save this customer to my Customers list
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: Invoice Meta -->
+                    <div class="invoice-section" id="sec-meta">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-meta')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-circle-info"></i> Invoice Details</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Invoice Number<span class="required">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" id="invoice-number" name="invoice_number" class="form-control" placeholder="INV-0001" />
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="regenerateInvoiceNumber()" title="Generate new number" style="margin-left:.375rem;border-radius:var(--radius-sm);">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6"><label class="form-label">PO / Reference Number</label><input type="text" id="po-number" name="po_number" class="form-control" placeholder="PO-12345" /></div>
+                                <div class="col-md-6"><label class="form-label">Invoice Date<span class="required">*</span></label><input type="text" id="invoice-date" name="invoice_date" class="form-control flatpickr" placeholder="DD/MM/YYYY" /></div>
+                                <div class="col-md-6"><label class="form-label">Due Date</label><input type="text" id="due-date" name="due_date" class="form-control flatpickr" placeholder="DD/MM/YYYY" /></div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Payment Terms</label>
+                                    <select class="form-select" id="payment-terms" onchange="setPaymentTerms(this.value)">
+                                        <option value="">Custom</option>
+                                        <option value="0">Due on Receipt</option>
+                                        <option value="15">Net 15 days</option>
+                                        <option value="30" selected>Net 30 days</option>
+                                        <option value="45">Net 45 days</option>
+                                        <option value="60">Net 60 days</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tax Mode</label>
+                                    <div class="doc-type-group">
+                                        <button class="doc-type-btn active" data-tax="per-item" id="tax-mode-per-item" onclick="setTaxMode('per-item')">Per Item</button>
+                                        <button class="doc-type-btn" data-tax="overall" id="tax-mode-overall" onclick="setTaxMode('overall')">Overall</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: Items Table -->
+                    <div class="invoice-section" id="sec-items">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-items')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-list"></i> Line Items</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body" style="padding:1rem;">
+                            <div class="items-table-wrapper">
+                                <table class="items-table" id="items-table" aria-label="Invoice line items">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:30px;">#</th>
+                                            <th style="min-width:140px;">Product / Service</th>
+                                            <th style="min-width:100px;">Description</th>
+                                            <th style="width:70px;">HSN</th>
+                                            <th style="width:70px;">Unit</th>
+                                            <th style="width:70px;">Qty</th>
+                                            <th style="width:90px;">Rate</th>
+                                            <th style="width:60px;">Disc%</th>
+                                            <th style="width:60px;">GST%</th>
+                                            <th style="width:90px;" class="text-end">Amount</th>
+                                            <th style="width:36px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="items-tbody">
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm add-item-btn" id="add-item-btn" onclick="addItemRow()">
+                                <i class="fa-solid fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: Summary -->
+                    <div class="invoice-section" id="sec-summary">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-summary')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-calculator"></i> Summary</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <!-- Discount -->
+                                    <label class="form-label">Global Discount</label>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <select class="form-select" id="discount-type" style="width:auto;flex-shrink:0;" onchange="calculateTotals()">
+                                            <option value="percent">%</option>
+                                            <option value="fixed">Fixed</option>
+                                        </select>
+                                        <input type="number" id="global-discount" name="discount_value" class="form-control" placeholder="0" min="0" value="0" oninput="calculateTotals()" />
+                                    </div>
+                                    <!-- Shipping -->
+                                    <label class="form-label mt-3">Shipping / Other Charges</label>
+                                    <input type="number" id="shipping-charge" name="shipping_charge" class="form-control" placeholder="0.00" min="0" value="0" oninput="calculateTotals()" />
+
+                                    <!-- Overall GST (hidden in per-item mode) -->
+                                    <div id="overall-gst-row" style="display:none;margin-top:1rem;">
+                                        <label class="form-label">Overall GST %</label>
+                                        <select class="form-select" id="overall-gst" onchange="calculateTotals()">
+                                            <option value="0">0% — Exempt</option>
+                                            <option value="5">5%</option>
+                                            <option value="12">12%</option>
+                                            <option value="18" selected>18%</option>
+                                            <option value="28">28%</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="summary-grid">
+                                        <div class="summary-row"><span>Subtotal</span><span class="amount-val" id="summary-subtotal">₹0.00</span></div>
+                                        <div class="summary-row"><span>Discount</span><span class="amount-val text-danger" id="summary-discount">-₹0.00</span></div>
+                                        <div class="summary-row"><span>Taxable Amount</span><span class="amount-val" id="summary-taxable">₹0.00</span></div>
+                                        <div class="summary-row"><span>GST / Tax</span><span class="amount-val" id="summary-tax">₹0.00</span></div>
+                                        <div class="summary-row"><span>Shipping</span><span class="amount-val" id="summary-shipping">₹0.00</span></div>
+                                        <div class="summary-row grand"><span>Grand Total</span><span id="summary-grand">₹0.00</span></div>
+                                    </div>
+                                    <div class="amount-in-words" id="amount-in-words">Zero Rupees Only</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: Notes & Terms -->
+                    <div class="invoice-section" id="sec-notes">
+                        <div class="invoice-section-header" onclick="toggleSection('sec-notes')">
+                            <div class="invoice-section-title"><i class="fa-solid fa-note-sticky"></i> Notes &amp; Terms</div>
+                            <i class="fa-solid fa-chevron-down section-toggle-icon"></i>
+                        </div>
+                        <div class="invoice-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Notes</label>
+                                    <textarea id="invoice-notes" name="notes" class="form-control" rows="4" placeholder="Thank you for your business!"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Terms &amp; Conditions</label>
+                                    <textarea id="invoice-terms" name="terms" class="form-control" rows="4" placeholder="Payment is due within 30 days…"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bank Details</label>
+                                    <textarea id="bank-details" name="bank_details" class="form-control" rows="3" placeholder="Bank: SBI&#10;Account: 123456&#10;IFSC: SBIN001"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Signature</label>
+                                    <div class="upload-zone" id="sig-upload-zone" onclick="document.getElementById('sig-file').click()">
+                                        <i class="fa-solid fa-signature"></i>
+                                        <div class="upload-zone-text">Click to upload signature</div>
+                                        <div class="upload-zone-hint">PNG/JPG, max 2MB</div>
+                                    </div>
+                                    <input type="file" id="sig-file" accept="image/*" style="display:none;" />
+                                    <img id="sig-preview" src="" alt="Signature preview" style="max-height:80px;max-width:200px;margin-top:.5rem;display:none;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /form col -->
+
+                <!-- ──── RIGHT: Preview Panel ──────────────────── -->
+                <div class="invoice-right-panel">
+
+                    <!-- Mini Preview -->
+                    <div class="right-panel-card">
+                        <div class="right-panel-title"><i class="fa-solid fa-eye"></i> Live Preview</div>
+                        <div class="mini-preview-wrap">
+                            <div class="mini-preview-paper" id="mini-preview">
+                                <!-- Updated by JS -->
+                                <div style="text-align:center;padding:1rem;color:#9CA3AF;font-size:8px;">Preview will appear here as you type.</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-2" data-bs-toggle="modal" data-bs-target="#previewModal" id="preview-btn">
+                            <i class="fa-solid fa-expand"></i> Full Preview
+                        </button>
+                    </div>
+
+                    <!-- Color Theme -->
+                    <div class="right-panel-card">
+                        <div class="right-panel-title"><i class="fa-solid fa-palette"></i> Theme Color</div>
+                        <div class="color-swatches" id="color-swatches">
+                            <div class="color-swatch active" data-color="#3B82F6" style="background:#3B82F6;" onclick="setThemeColor('#3B82F6',this)" title="Blue"></div>
+                            <div class="color-swatch" data-color="#06B6D4" style="background:#06B6D4;" onclick="setThemeColor('#06B6D4',this)" title="Cyan"></div>
+                            <div class="color-swatch" data-color="#22C55E" style="background:#22C55E;" onclick="setThemeColor('#22C55E',this)" title="Green"></div>
+                            <div class="color-swatch" data-color="#8B5CF6" style="background:#8B5CF6;" onclick="setThemeColor('#8B5CF6',this)" title="Purple"></div>
+                            <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;" onclick="setThemeColor('#F59E0B',this)" title="Amber"></div>
+                            <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;" onclick="setThemeColor('#EF4444',this)" title="Red"></div>
+                            <div class="color-swatch" data-color="#111827" style="background:#111827;" onclick="setThemeColor('#111827',this)" title="Dark"></div>
+                            <input type="color" id="custom-color-pick" class="color-swatch-custom" value="#3B82F6" title="Custom color" onchange="setThemeColor(this.value,null)" />
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="right-panel-card">
+                        <div class="right-panel-title"><i class="fa-solid fa-receipt"></i> Summary</div>
+                        <div class="summary-grid" style="font-size:.875rem;">
+                            <div class="summary-row"><span>Subtotal</span><span id="rp-subtotal">₹0.00</span></div>
+                            <div class="summary-row"><span>Tax</span><span id="rp-tax">₹0.00</span></div>
+                            <div class="summary-row grand" style="font-size:.975rem;"><span>Total</span><span id="rp-grand">₹0.00</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Draft status -->
+                    <div class="right-panel-card">
+                        <div class="right-panel-title"><i class="fa-solid fa-floppy-disk"></i> Auto-save</div>
+                        <div style="font-size:.78rem;color:var(--text-muted);">
+                            <i class="fa-solid fa-circle" id="autosave-indicator" style="color:var(--warning);font-size:.5rem;"></i>
+                            <span id="autosave-text">Changes not saved</span>
+                        </div>
+                        <div style="font-size:.75rem;color:var(--text-light);margin-top:.25rem;" id="last-saved-text"></div>
+                    </div>
+
+                </div><!-- /right panel -->
+            </div><!-- /editor layout -->
+
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+
+    <!-- ══ Sticky Action Bar ══ -->
+    <div class="invoice-action-bar" id="invoice-action-bar">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearInvoiceForm()">
+            <i class="fa-solid fa-xmark"></i> Clear
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="saveInvoice(true)" id="save-draft-btn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Draft
+        </button>
+        <button type="button" class="btn btn-primary" onclick="saveInvoice(false)" id="save-invoice-btn">
+            <i class="fa-solid fa-check"></i> Save Invoice
+        </button>
+        <div style="margin-left:auto;display:flex;gap:.5rem;">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#previewModal">
+                <i class="fa-solid fa-eye"></i> Preview
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadPDF()" id="download-pdf-btn">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="printInvoice()">
+                <i class="fa-solid fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- ══ Preview Modal ══ -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="previewModalLabel"><i class="fa-solid fa-file-invoice"></i> Invoice Preview</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="background:var(--bg-secondary);min-height:70vh;">
+                    <div style="padding:1.5rem;">
+                        <div class="invoice-paper" id="invoice-render-area">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="printInvoice()"><i class="fa-solid fa-print"></i> Print</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadPDF()"><i class="fa-solid fa-download"></i> Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module" src="assets/js/invoice.js"></script>
+</body>
+</html>

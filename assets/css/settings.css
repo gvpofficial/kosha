@@ -1,0 +1,148 @@
+/* ============================================================
+   KOSHA - Settings Page CSS
+   ============================================================ */
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+.settings-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ─── Settings Nav ───────────────────────────────────────────── */
+.settings-nav {
+    background: var(--card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: .5rem;
+    position: sticky;
+    top: calc(var(--topbar-height) + 1.25rem);
+    box-shadow: var(--shadow-card);
+}
+.settings-nav-item {
+    display: flex; align-items: center; gap: .625rem;
+    width: 100%; padding: .625rem .875rem;
+    border: none; background: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary); font-size: .8375rem; font-weight: 500;
+    cursor: pointer; text-align: left; transition: var(--transition);
+    font-family: inherit;
+}
+.settings-nav-item i { width: 16px; text-align: center; flex-shrink: 0; }
+.settings-nav-item:hover { background: var(--bg-secondary); color: var(--text-primary); }
+.settings-nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+
+/* ─── Settings Panel ─────────────────────────────────────────── */
+.settings-panel { display: none; }
+.settings-panel.active { display: block; }
+.settings-panel-header { margin-bottom: 1.5rem; }
+.settings-panel-title { font-size: 1.125rem; font-weight: 700; margin-bottom: .25rem; }
+.settings-panel-subtitle { font-size: .875rem; color: var(--text-muted); }
+.settings-form-footer { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-light); }
+.settings-section-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: .875rem; }
+
+/* ─── Logo Upload ────────────────────────────────────────────── */
+.logo-upload-area { display: flex; gap: 1.25rem; align-items: flex-start; margin-bottom: 1.5rem; }
+.logo-upload-box {
+    width: 120px; height: 90px; flex-shrink: 0;
+    border: 2px dashed var(--border); border-radius: var(--radius-md);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition);
+    color: var(--text-muted); font-size: .75rem; gap: .25rem;
+    background: var(--bg-secondary);
+}
+.logo-upload-box:hover { border-color: var(--primary); color: var(--primary); }
+.logo-upload-box i { font-size: 1.5rem; }
+
+/* ─── Account Avatar ─────────────────────────────────────────── */
+.account-avatar-row { display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem; }
+.account-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; font-weight: 800; color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15); flex-shrink: 0;
+}
+
+/* ─── Theme Selector ─────────────────────────────────────────── */
+.theme-selector { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.theme-card {
+    cursor: pointer; text-align: center;
+    border: 2px solid var(--border); border-radius: var(--radius-md);
+    overflow: hidden; transition: var(--transition); width: 100px;
+}
+.theme-card:hover { border-color: var(--primary); transform: scale(1.04); }
+.theme-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+.theme-preview {
+    height: 70px; display: flex; overflow: hidden;
+}
+.theme-preview-light { background: #F8FAFC; }
+.theme-preview-dark { background: #0D1117; }
+.theme-preview-system {
+    background: linear-gradient(90deg, #0D1117 50%, #F8FAFC 50%);
+}
+.tp-sidebar { width: 28px; height: 70px; background: rgba(59,130,246,.35); }
+.tp-content { flex: 1; height: 70px; }
+.theme-card-label { font-size: .75rem; font-weight: 600; padding: .375rem; color: var(--text-secondary); background: var(--bg-secondary); }
+
+/* ─── Toggle Switch ──────────────────────────────────────────── */
+.toggle-switch { position: relative; display: inline-flex; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: relative; display: inline-block;
+    width: 44px; height: 24px; background: var(--border);
+    border-radius: 12px; transition: .3s;
+}
+.toggle-slider::after {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px;
+    transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+.toggle-switch input:checked + .toggle-slider::after { left: 23px; }
+
+/* ─── Notifications ──────────────────────────────────────────── */
+.notif-group { display: flex; flex-direction: column; gap: 0; }
+.notif-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .875rem 0; border-bottom: 1px solid var(--border-light);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-desc { font-size: .8125rem; color: var(--text-muted); margin-top: .125rem; }
+
+/* ─── Data Export Cards ──────────────────────────────────────── */
+.data-action-card {
+    display: flex; align-items: center; gap: .875rem;
+    padding: 1rem; border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); margin-bottom: .75rem;
+    transition: var(--transition);
+}
+.data-action-card:hover { border-color: var(--primary-light); background: var(--bg-secondary); }
+.data-action-icon {
+    width: 44px; height: 44px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.2rem; flex-shrink: 0;
+}
+
+/* ─── Danger Zone ────────────────────────────────────────────── */
+.settings-danger-zone {
+    border: 1.5px solid #FECACA; border-radius: var(--radius-md);
+    padding: 1.125rem; margin-top: 1rem;
+}
+.danger-zone-title { font-size: .8125rem; font-weight: 700; color: var(--danger); margin-bottom: .875rem; display: flex; gap: .375rem; align-items: center; }
+.danger-zone-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .75rem 0; border-bottom: 1px solid #FEE2E2;
+}
+.danger-zone-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+/* ─── Divider ────────────────────────────────────────────────── */
+.divider { border: none; border-top: 1px solid var(--border-light); margin: 1.5rem 0; }
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .settings-layout { grid-template-columns: 1fr; }
+    .settings-nav { position: static; display: flex; flex-wrap: wrap; gap: .25rem; padding: .5rem; }
+    .settings-nav-item { width: auto; font-size: .75rem; padding: .5rem .75rem; }
+}

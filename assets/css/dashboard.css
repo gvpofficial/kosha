@@ -1,0 +1,133 @@
+/* ============================================================
+   KOSHA - Dashboard CSS
+   ============================================================ */
+
+/* ─── Quick Actions ──────────────────────────────────────────── */
+.quick-actions-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+.quick-action-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .75rem; padding: 1.5rem 1rem;
+    background: var(--card); border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-lg); text-decoration: none;
+    color: var(--text-primary); font-size: .875rem; font-weight: 600;
+    transition: all .25s ease; cursor: pointer;
+    box-shadow: var(--shadow-card);
+}
+.quick-action-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+    color: var(--text-primary);
+}
+.qa-icon {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+/* ─── Status Legend ──────────────────────────────────────────── */
+.status-legend-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: .5rem; width: 100%;
+}
+.legend-item {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .78rem; color: var(--text-secondary);
+}
+.legend-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ─── Customer Mini List ─────────────────────────────────────── */
+.customer-mini-list { padding: .5rem 0; }
+.customer-mini-item {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+    transition: var(--transition); cursor: pointer;
+}
+.customer-mini-item:last-child { border-bottom: none; }
+.customer-mini-item:hover { background: var(--bg-secondary); }
+.cust-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: .8rem; font-weight: 700;
+    flex-shrink: 0;
+}
+.cust-name { font-size: .875rem; font-weight: 600; color: var(--text-primary); }
+.cust-email { font-size: .75rem; color: var(--text-muted); }
+.cust-amount { font-size: .8125rem; font-weight: 700; color: var(--text-primary); margin-left: auto; }
+
+/* ─── Product Mini List ──────────────────────────────────────── */
+.product-mini-list { padding: .5rem 0; }
+.product-mini-item {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+    transition: var(--transition);
+}
+.product-mini-item:last-child { border-bottom: none; }
+.product-mini-item:hover { background: var(--bg-secondary); }
+.product-stock-badge {
+    font-size: .72rem; font-weight: 700; padding: .25rem .625rem;
+    border-radius: var(--radius-full); flex-shrink: 0;
+}
+.stock-critical { background: var(--danger-light); color: var(--danger); }
+.stock-low { background: var(--warning-light); color: #B45309; }
+.stock-ok { background: var(--success-light); color: var(--accent-dark); }
+
+/* ─── Activity Feed ──────────────────────────────────────────── */
+.activity-list { padding: .5rem 0; }
+.activity-item {
+    display: flex; align-items: flex-start; gap: .875rem;
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--border-light); position: relative;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .875rem; flex-shrink: 0; margin-top: .1rem;
+}
+.activity-icon.invoice { background: var(--primary-light); color: var(--primary); }
+.activity-icon.customer { background: var(--accent-light); color: var(--accent-dark); }
+.activity-icon.product { background: var(--warning-light); color: #B45309; }
+.activity-icon.payment { background: var(--success-light); color: var(--accent-dark); }
+.activity-desc { font-size: .875rem; color: var(--text-secondary); line-height: 1.5; }
+.activity-desc strong { color: var(--text-primary); font-weight: 600; }
+.activity-time { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+
+/* ─── Recent Invoices Actions ────────────────────────────────── */
+.invoice-action-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); padding: .3rem .5rem;
+    border-radius: var(--radius-sm); transition: var(--transition);
+    font-size: .875rem;
+}
+.invoice-action-btn:hover { color: var(--primary); background: var(--primary-light); }
+.invoice-action-btn.danger:hover { color: var(--danger); background: var(--danger-light); }
+
+/* ─── Revenue Year Select ────────────────────────────────────── */
+.chart-legend {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .75rem;
+}
+.chart-legend-item {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .78rem; color: var(--text-muted);
+}
+.chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 992px) {
+    .quick-actions-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 576px) {
+    .quick-actions-row { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+    .quick-action-btn { padding: 1.25rem .75rem; font-size: .8125rem; }
+    .qa-icon { width: 44px; height: 44px; font-size: 1.1rem; }
+}
