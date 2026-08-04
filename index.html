@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kosha — Invoice Management</title>
+    <style>
+        body {
+            margin: 0; padding: 0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #F0F4F8; color: #374151;
+        }
+        .loader-box { text-align: center; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid #E5E7EB;
+            border-top-color: #3B82F6; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <div style="font-weight:600;font-size:0.9rem;">Loading Kosha…</div>
+    </div>
+
+    <script type="module">
+        import { getCurrentUser } from './assets/js/supabase.js';
+        
+        async function checkAuthAndRedirect() {
+            try {
+                const user = await getCurrentUser();
+                if (user) {
+                    window.location.replace('dashboard.html');
+                } else {
+                    window.location.replace('login.html');
+                }
+            } catch (e) {
+                window.location.replace('login.html');
+            }
+        }
+        
+        checkAuthAndRedirect();
+    </script>
+</body>
+</html>
