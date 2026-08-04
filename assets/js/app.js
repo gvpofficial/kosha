@@ -19,7 +19,7 @@ export function initApp() {
 
 // ── Dark Mode ────────────────────────────────────────────────────
 function initDarkMode() {
-    const saved = lsGet('kosha_theme') || 'light';
+    const saved = lsGet('kosha_theme') || 'dark';
     let theme = saved;
     if (saved === 'system') {
         theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

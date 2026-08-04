@@ -1,5 +1,5 @@
 /**
- * Kosha - Authentication Logic (Sign In & Sign Up)
+ * Kosha - Authentication Logic & Animated Particle Background
  */
 
 import { signInWithEmail, signUpWithEmail, getCurrentUser, supabase } from './supabase.js';
@@ -13,21 +13,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initAuthPage();
+    initParticleCanvas();
 });
 
 function initAuthPage() {
-    const tabSigninBtn  = document.getElementById('tab-signin-btn');
-    const tabSignupBtn  = document.getElementById('tab-signup-btn');
-    const signinForm    = document.getElementById('signin-form');
-    const signupForm    = document.getElementById('signup-form');
-    const forgotPanel   = document.getElementById('forgot-panel');
-    const forgotForm    = document.getElementById('forgot-form');
-    const showForgotBtn = document.getElementById('show-forgot-btn');
-    const backToLoginBtn= document.getElementById('back-to-login-btn');
-    const alertEl       = document.getElementById('auth-alert');
-    const alertText     = document.getElementById('auth-alert-text');
-    const successEl     = document.getElementById('auth-success');
-    const successText   = document.getElementById('auth-success-text');
+    const tabSigninBtn   = document.getElementById('tab-signin-btn');
+    const tabSignupBtn   = document.getElementById('tab-signup-btn');
+    const signinForm     = document.getElementById('signin-form');
+    const signupForm     = document.getElementById('signup-form');
+    const forgotPanel    = document.getElementById('forgot-panel');
+    const forgotForm     = document.getElementById('forgot-form');
+    const showForgotBtn  = document.getElementById('show-forgot-btn');
+    const backToLoginBtn = document.getElementById('back-to-login-btn');
+    const alertEl        = document.getElementById('auth-alert');
+    const alertText      = document.getElementById('auth-alert-text');
+    const resendBtn      = document.getElementById('resend-verification-btn');
+    const successEl      = document.getElementById('auth-success');
+    const successTitle   = document.getElementById('auth-success-title');
+    const successText    = document.getElementById('auth-success-text');
+
+    let lastAttemptedEmail = '';
 
     // ── Tab Switcher ───────────────────────────────────────
     function switchTab(mode) {
@@ -86,6 +91,7 @@ function initAuthPage() {
         const email    = document.getElementById('signin-email').value.trim();
         const password = document.getElementById('signin-password').value;
         const remember = document.getElementById('remember-me').checked;
+        lastAttemptedEmail = email;
 
         if (!email || !password) {
             showAlert('Please enter your email and password.');
@@ -96,9 +102,15 @@ function initAuthPage() {
 
         const { data, error } = await signInWithEmail(email, password);
 
+        setLoading('signin-submit-btn', false);
+
         if (error) {
-            setLoading('signin-submit-btn', false);
-            showAlert(error.message || 'Login failed. Please check your credentials.');
+            const msg = error.message || '';
+            if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('unconfirmed')) {
+                showAlert('Your email address has not been verified yet.', true);
+            } else {
+                showAlert(msg || 'Login failed. Please check your credentials.', false);
+            }
             return;
         }
 
@@ -120,6 +132,7 @@ function initAuthPage() {
         const email    = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirm  = document.getElementById('signup-confirm').value;
+        lastAttemptedEmail = email;
 
         if (!fullName || !email || !password) {
             showAlert('Please fill in all required fields.');
@@ -147,18 +160,52 @@ function initAuthPage() {
             return;
         }
 
-        // If auto sign-in happens or verification email is sent
         if (data?.session) {
-            showSuccess('Account created! Redirecting to dashboard…');
+            showSuccess('Account created!', 'Redirecting to dashboard…');
             setTimeout(() => { window.location.replace('dashboard.html'); }, 1200);
         } else {
-            showSuccess('Account created successfully! You can now Sign In.');
+            showSuccess(
+                '📧 Verification Email Sent!',
+                `We have sent a confirmation link to ${email}. Please check your inbox (and spam folder) and click the link to activate your account before signing in.`
+            );
             signupForm.reset();
-            setTimeout(() => switchTab('signin'), 1800);
+            const signinEmail = document.getElementById('signin-email');
+            if (signinEmail) signinEmail.value = email;
+            setTimeout(() => switchTab('signin'), 3000);
         }
     });
 
-    // ── 3. FORGOT PASSWORD SUBMIT ──────────────────────────
+    // ── 3. RESEND VERIFICATION EMAIL ────────────────────────
+    resendBtn?.addEventListener('click', async () => {
+        if (!lastAttemptedEmail) {
+            lastAttemptedEmail = document.getElementById('signin-email')?.value.trim();
+        }
+
+        if (!lastAttemptedEmail) {
+            showAlert('Please enter your email address first.');
+            return;
+        }
+
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email: lastAttemptedEmail
+        });
+
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Resend Verification Email';
+
+        if (error) {
+            showAlert(error.message || 'Failed to resend verification email.');
+        } else {
+            showSuccess('Verification Email Resent!', `A new link was sent to ${lastAttemptedEmail}. Check your inbox.`);
+            hideAlert();
+        }
+    });
+
+    // ── 4. FORGOT PASSWORD SUBMIT ──────────────────────────
     forgotForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         hideAlert(); hideSuccess();
@@ -181,7 +228,7 @@ function initAuthPage() {
         if (error) {
             showAlert(error.message || 'Failed to send reset email.');
         } else {
-            showSuccess('Password reset link sent to your email!');
+            showSuccess('Reset Link Sent!', `Password recovery email sent to ${email}. Check your inbox.`);
             document.getElementById('forgot-email').value = '';
         }
     });
@@ -194,14 +241,19 @@ function initAuthPage() {
     }
 
     // ── Helpers ────────────────────────────────────────────
-    function showAlert(msg) {
+    function showAlert(msg, showResendOption = false) {
         alertText.textContent = msg;
         alertEl.classList.add('show');
+        if (resendBtn) resendBtn.style.display = showResendOption ? 'inline-flex' : 'none';
     }
-    function hideAlert() { alertEl.classList.remove('show'); }
+    function hideAlert() {
+        alertEl.classList.remove('show');
+        if (resendBtn) resendBtn.style.display = 'none';
+    }
 
-    function showSuccess(msg) {
-        successText.textContent = msg;
+    function showSuccess(title, text) {
+        successTitle.textContent = title;
+        successText.textContent = text;
         successEl.classList.add('show');
     }
     function hideSuccess() { successEl.classList.remove('show'); }
@@ -217,4 +269,78 @@ function initAuthPage() {
             btn.disabled = false;
         }
     }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  BACKGROUND PARTICLE CANVAS ANIMATION
+// ════════════════════════════════════════════════════════════════
+function initParticleCanvas() {
+    const canvas = document.getElementById('login-particle-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+        if (!canvas.parentElement) return;
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+    }
+    resize();
+
+    window.addEventListener('resize', resize);
+
+    const particles = [];
+    const count = 40;
+
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * (canvas.width || 500),
+            y: Math.random() * (canvas.height || 500),
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            radius: Math.random() * 2 + 1,
+            alpha: Math.random() * 0.5 + 0.2,
+            color: Math.random() > 0.4 ? 'rgba(16, 101, 255,' : 'rgba(23, 230, 174,'
+        });
+    }
+
+    function animate() {
+        const w = canvas.width || 500;
+        const h = canvas.height || 500;
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < count; i++) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y < 0 || p.y > h) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `${p.color}${p.alpha})`;
+            ctx.fill();
+
+            // Connect nearby particles
+            for (let j = i + 1; j < count; j++) {
+                const p2 = particles[j];
+                const dx = p.x - p2.x;
+                const dy = p.y - p2.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 110) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(16, 101, 255, ${0.15 * (1 - dist / 110)})`;
+                    ctx.lineWidth = 0.6;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
 }

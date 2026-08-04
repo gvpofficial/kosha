@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,20 +14,23 @@
 </head>
 <body class="login-page">
 
-    <!-- ══ LEFT PANEL ════════════════════════════════════════ -->
+    <!-- ══ LEFT PANEL (Centered Content + Bottom Copyright) ═════ -->
     <div class="login-left">
-        <!-- Floating glow shapes -->
+        <!-- Interactive Particle Canvas -->
+        <canvas id="login-particle-canvas" class="login-particle-canvas"></canvas>
+
+        <!-- Glow Accents -->
         <div class="login-glow-1" aria-hidden="true"></div>
         <div class="login-glow-2" aria-hidden="true"></div>
 
-        <!-- Logo Placeholder -->
-        <div class="logo-placeholder-large" title="Your Logo Placeholder">
-            <i class="fa-solid fa-cloud-bolt"></i>
-            <span>YOUR LOGO</span>
-        </div>
+        <!-- MAIN CENTERED GROUP (Logo + Badge + Title + Tagline + Pills) -->
+        <div class="login-left-main">
+            <!-- Logo Placeholder -->
+            <div class="logo-placeholder-large" title="Your Logo Placeholder">
+                <i class="fa-solid fa-cloud-bolt"></i>
+                <span>YOUR LOGO</span>
+            </div>
 
-        <!-- Brand Headline -->
-        <div class="login-brand-box">
             <div class="brand-badge-pill">
                 <span class="pulse-dot"></span> Next-Gen Billing Suite
             </div>
@@ -36,17 +39,20 @@
                 Modern, lightning-fast invoice management with real-time analytics, 
                 customer tracking, GST compliance, and seamless cloud backups.
             </p>
+
+            <!-- Feature Pills Grid -->
+            <div class="login-pills-grid">
+                <div class="login-pill"><i class="fa-solid fa-shield-halved"></i> Enterprise RLS Security</div>
+                <div class="login-pill"><i class="fa-solid fa-bolt"></i> Instant PDF Generation</div>
+                <div class="login-pill"><i class="fa-solid fa-chart-line"></i> Financial Analytics</div>
+                <div class="login-pill"><i class="fa-solid fa-receipt"></i> GST &amp; Tax Ready</div>
+            </div>
         </div>
 
-        <!-- Feature Pills -->
-        <div class="login-pills-grid">
-            <div class="login-pill"><i class="fa-solid fa-shield-halved"></i> Enterprise RLS Security</div>
-            <div class="login-pill"><i class="fa-solid fa-bolt"></i> Instant PDF Generation</div>
-            <div class="login-pill"><i class="fa-solid fa-chart-line"></i> Financial Analytics</div>
-            <div class="login-pill"><i class="fa-solid fa-receipt"></i> GST &amp; Tax Ready</div>
+        <!-- BOTTOM COPYRIGHT -->
+        <div class="login-left-footer">
+            <p class="login-footer-text">&copy; 2026 Kosha. Engineered for performance.</p>
         </div>
-
-        <p class="login-footer-text">&copy; 2026 Kosha. Engineered for performance.</p>
     </div>
 
     <!-- ══ RIGHT PANEL ════════════════════════════════════════ -->
@@ -66,156 +72,38 @@
                 </button>
             </div>
 
-            <!-- Error / Alert Banner -->
+            <!-- Alert Messages -->
             <div id="auth-alert" class="auth-alert" role="alert" aria-live="assertive">
                 <i class="fa-solid fa-circle-exclamation" id="auth-alert-icon"></i>
-                <span id="auth-alert-text">Error message</span>
+                <div style="flex:1;">
+                    <span id="auth-alert-text">Error message</span>
+                    <button type="button" id="resend-verification-btn" class="resend-link-btn" style="display:none;">
+                        <i class="fa-solid fa-paper-plane"></i> Resend Verification Email
+                    </button>
+                </div>
             </div>
 
-            <!-- Success Alert Banner -->
+            <!-- Verification / Success Banner -->
             <div id="auth-success" class="auth-success" role="alert" aria-live="polite">
-                <i class="fa-solid fa-circle-check"></i>
-                <span id="auth-success-text">Success message</span>
+                <i class="fa-solid fa-circle-check" style="font-size:1.2rem;"></i>
+                <div style="flex:1;">
+                    <strong id="auth-success-title" style="display:block;margin-bottom:0.15rem;">Success</strong>
+                    <span id="auth-success-text">Success message</span>
+                </div>
             </div>
 
-            <!-- ── 1. SIGN IN FORM ── -->
-            <form id="signin-form" class="auth-form active" novalidate>
-                <div class="form-group">
-                    <label class="form-label" for="signin-email">Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-envelope input-icon"></i>
-                        <input
-                            type="email"
-                            id="signin-email"
-                            class="form-control"
-                            placeholder="you@domain.com"
-                            autocomplete="email"
-                            required
-                        />
-                    </div>
-                </div>
+            <!-- Forms Wrapper -->
+            <div class="forms-container">
 
-                <div class="form-group">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0" for="signin-password">Password</label>
-                        <a href="#" class="forgot-link" id="show-forgot-btn">Forgot?</a>
-                    </div>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-lock input-icon"></i>
-                        <input
-                            type="password"
-                            id="signin-password"
-                            class="form-control"
-                            placeholder="••••••••"
-                            autocomplete="current-password"
-                            required
-                        />
-                        <button type="button" class="password-toggle" data-target="signin-password" aria-label="Toggle visibility">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="login-extras">
-                    <label class="login-remember">
-                        <input type="checkbox" id="remember-me" checked />
-                        Keep me signed in
-                    </label>
-                </div>
-
-                <button type="submit" class="btn-gvp-primary" id="signin-submit-btn">
-                    <span class="btn-spinner" aria-hidden="true"></span>
-                    <span class="btn-text">Sign In to Dashboard <i class="fa-solid fa-arrow-right"></i></span>
-                </button>
-            </form>
-
-            <!-- ── 2. CREATE ACCOUNT FORM ── -->
-            <form id="signup-form" class="auth-form" novalidate>
-                <div class="form-group">
-                    <label class="form-label" for="signup-name">Full Name</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-user input-icon"></i>
-                        <input
-                            type="text"
-                            id="signup-name"
-                            class="form-control"
-                            placeholder="Gupthan Vishnu Prasad"
-                            autocomplete="name"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="signup-email">Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-envelope input-icon"></i>
-                        <input
-                            type="email"
-                            id="signup-email"
-                            class="form-control"
-                            placeholder="name@company.com"
-                            autocomplete="email"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="signup-password">Password</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-lock input-icon"></i>
-                        <input
-                            type="password"
-                            id="signup-password"
-                            class="form-control"
-                            placeholder="At least 6 characters"
-                            autocomplete="new-password"
-                            required
-                        />
-                        <button type="button" class="password-toggle" data-target="signup-password" aria-label="Toggle visibility">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="signup-confirm">Confirm Password</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-shield-check input-icon"></i>
-                        <input
-                            type="password"
-                            id="signup-confirm"
-                            class="form-control"
-                            placeholder="Re-enter password"
-                            autocomplete="new-password"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-gvp-primary" id="signup-submit-btn">
-                    <span class="btn-spinner" aria-hidden="true"></span>
-                    <span class="btn-text">Create Free Account <i class="fa-solid fa-user-check"></i></span>
-                </button>
-            </form>
-
-            <!-- ── 3. FORGOT PASSWORD FORM ── -->
-            <div id="forgot-panel" class="auth-form">
-                <button type="button" id="back-to-login-btn" class="btn-back">
-                    <i class="fa-solid fa-arrow-left"></i> Back to Sign In
-                </button>
-                <h3 class="form-heading">Reset Password</h3>
-                <p class="form-subheading">Enter your account email to receive a password reset link.</p>
-
-                <form id="forgot-form" novalidate>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="forgot-email">Email Address</label>
+                <!-- ── 1. SIGN IN FORM ── -->
+                <form id="signin-form" class="auth-form active" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="signin-email">Email Address</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-envelope input-icon"></i>
                             <input
                                 type="email"
-                                id="forgot-email"
+                                id="signin-email"
                                 class="form-control"
                                 placeholder="you@domain.com"
                                 autocomplete="email"
@@ -223,12 +111,139 @@
                             />
                         </div>
                     </div>
-                    <button type="submit" class="btn-gvp-primary" id="forgot-submit-btn">
+
+                    <div class="form-group">
+                        <label class="form-label" for="signin-password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input
+                                type="password"
+                                id="signin-password"
+                                class="form-control"
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                required
+                            />
+                            <button type="button" class="password-toggle" data-target="signin-password" aria-label="Toggle visibility">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="login-extras">
+                            <label class="login-remember">
+                                <input type="checkbox" id="remember-me" checked /> Keep me signed in
+                            </label>
+                            <a href="#" class="forgot-link" id="show-forgot-btn">Forgot password?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-gvp-primary" id="signin-submit-btn">
                         <span class="btn-spinner" aria-hidden="true"></span>
-                        <span class="btn-text">Send Recovery Email <i class="fa-solid fa-paper-plane"></i></span>
+                        <span class="btn-text">Sign In to Dashboard <i class="fa-solid fa-arrow-right"></i></span>
                     </button>
                 </form>
-            </div>
+
+                <!-- ── 2. CREATE ACCOUNT FORM ── -->
+                <form id="signup-form" class="auth-form" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-name">Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user input-icon"></i>
+                            <input
+                                type="text"
+                                id="signup-name"
+                                class="form-control"
+                                placeholder="Gupthan Vishnu Prasad"
+                                autocomplete="name"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope input-icon"></i>
+                            <input
+                                type="email"
+                                id="signup-email"
+                                class="form-control"
+                                placeholder="name@company.com"
+                                autocomplete="email"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input
+                                type="password"
+                                id="signup-password"
+                                class="form-control"
+                                placeholder="At least 6 characters"
+                                autocomplete="new-password"
+                                required
+                            />
+                            <button type="button" class="password-toggle" data-target="signup-password" aria-label="Toggle visibility">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signup-confirm">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-shield-halved input-icon"></i>
+                            <input
+                                type="password"
+                                id="signup-confirm"
+                                class="form-control"
+                                placeholder="Re-enter password"
+                                autocomplete="new-password"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-gvp-primary" id="signup-submit-btn">
+                        <span class="btn-spinner" aria-hidden="true"></span>
+                        <span class="btn-text">Create Account <i class="fa-solid fa-user-check"></i></span>
+                    </button>
+                </form>
+
+                <!-- ── 3. FORGOT PASSWORD FORM ── -->
+                <div id="forgot-panel" class="auth-form">
+                    <button type="button" id="back-to-login-btn" class="btn-back">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+                    </button>
+                    <h3 class="form-heading">Reset Password</h3>
+                    <p class="form-subheading">Enter your email and we'll send a password recovery link.</p>
+
+                    <form id="forgot-form" novalidate>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="forgot-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-envelope input-icon"></i>
+                                <input
+                                    type="email"
+                                    id="forgot-email"
+                                    class="form-control"
+                                    placeholder="you@domain.com"
+                                    autocomplete="email"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-gvp-primary" id="forgot-submit-btn">
+                            <span class="btn-spinner" aria-hidden="true"></span>
+                            <span class="btn-text">Send Recovery Link <i class="fa-solid fa-paper-plane"></i></span>
+                        </button>
+                    </form>
+                </div>
+
+            </div><!-- /forms-container -->
 
         </div>
     </div>

@@ -6,12 +6,17 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // ────────────────────────────────────────────────────────────────
-// CONFIGURATION — Replace with your Supabase project values
+// CONFIGURATION — Supabase project values
 // ────────────────────────────────────────────────────────────────
 const SUPABASE_URL     = 'https://xmjhnvthrakdiqtmtxgi.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtamhudnRocmFrZGlxdG10eGdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MTk3NTEsImV4cCI6MjEwMTM5NTc1MX0.0VR9XzL29zxVe7Ge2AdTXmrjzPllxcIW6Ynlvr5jZjA';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+const isValidConfig = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
+
+const targetUrl = isValidConfig ? SUPABASE_URL : 'https://placeholder.supabase.co';
+const targetKey = isValidConfig ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder';
+
+export const supabase = createClient(targetUrl, targetKey, {
     auth: { persistSession: true, autoRefreshToken: true }
 });
 
