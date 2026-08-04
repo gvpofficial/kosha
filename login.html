@@ -14,43 +14,84 @@
 </head>
 <body class="login-page">
 
-    <!-- ══ LEFT PANEL (Centered Content + Bottom Copyright) ═════ -->
+    <!-- ══ LEFT PANEL — Redesigned Hero ══════════════════════════ -->
     <div class="login-left">
         <!-- Interactive Particle Canvas -->
         <canvas id="login-particle-canvas" class="login-particle-canvas"></canvas>
 
-        <!-- Glow Accents -->
-        <div class="login-glow-1" aria-hidden="true"></div>
-        <div class="login-glow-2" aria-hidden="true"></div>
+        <!-- Animated Gradient Orbs -->
+        <div class="login-orb login-orb-1" aria-hidden="true"></div>
+        <div class="login-orb login-orb-2" aria-hidden="true"></div>
+        <div class="login-orb login-orb-3" aria-hidden="true"></div>
 
-        <!-- MAIN CENTERED GROUP (Logo + Badge + Title + Tagline + Pills) -->
-        <div class="login-left-main">
-            <!-- Logo Placeholder -->
-            <div class="logo-placeholder-large" title="Your Logo Placeholder">
-                <i class="fa-solid fa-cloud-bolt"></i>
-                <span>YOUR LOGO</span>
-            </div>
+        <!-- Grid Pattern Overlay -->
+        <div class="login-grid-overlay" aria-hidden="true"></div>
 
-            <div class="brand-badge-pill">
-                <span class="pulse-dot"></span> Next-Gen Billing Suite
+        <!-- Top Bar: Logo + Version -->
+        <div class="login-left-topbar">
+            <img src="assets/img/Kosha long.svg" alt="Kosha Logo" class="login-logo-img" />
+            <div class="version-chip">v2.0</div>
+        </div>
+
+        <!-- Hero Content -->
+        <div class="login-left-hero">
+            <div class="hero-label">
+                <span class="pulse-dot"></span>
+                Next-Gen Billing Suite
             </div>
-            <h1 class="login-brand-name">Kosha<span class="dot-accent">.</span></h1>
-            <p class="login-tagline">
-                Modern, lightning-fast invoice management with real-time analytics, 
-                customer tracking, GST compliance, and seamless cloud backups.
+            <h1 class="hero-title">
+                Manage invoices<br>
+                <span class="hero-gradient-text">effortlessly.</span>
+            </h1>
+            <p class="hero-description">
+                Real-time analytics, GST compliance, customer tracking,
+                and seamless cloud backups — all in one place.
             </p>
+        </div>
 
-            <!-- Feature Pills Grid -->
-            <div class="login-pills-grid">
-                <div class="login-pill"><i class="fa-solid fa-shield-halved"></i> Enterprise RLS Security</div>
-                <div class="login-pill"><i class="fa-solid fa-bolt"></i> Instant PDF Generation</div>
-                <div class="login-pill"><i class="fa-solid fa-chart-line"></i> Financial Analytics</div>
-                <div class="login-pill"><i class="fa-solid fa-receipt"></i> GST &amp; Tax Ready</div>
+        <!-- Feature Cards -->
+        <div class="login-feature-cards">
+            <div class="feature-card" style="animation-delay: 0.1s;">
+                <div class="feature-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="feature-card-body">
+                    <h4>Enterprise Security</h4>
+                    <p>Row-level security with end-to-end encryption</p>
+                </div>
+            </div>
+            <div class="feature-card" style="animation-delay: 0.25s;">
+                <div class="feature-card-icon icon-bolt"><i class="fa-solid fa-bolt"></i></div>
+                <div class="feature-card-body">
+                    <h4>Instant PDFs</h4>
+                    <p>Generate professional invoices in milliseconds</p>
+                </div>
+            </div>
+            <div class="feature-card" style="animation-delay: 0.4s;">
+                <div class="feature-card-icon icon-chart"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="feature-card-body">
+                    <h4>Live Analytics</h4>
+                    <p>Real-time financial insights and reporting</p>
+                </div>
             </div>
         </div>
 
-        <!-- BOTTOM COPYRIGHT -->
-        <div class="login-left-footer">
+        <!-- Bottom Stats + Copyright -->
+        <div class="login-left-bottom">
+            <div class="login-stats-bar">
+                <div class="login-stat-item">
+                    <span class="stat-value">10K+</span>
+                    <span class="stat-label">Invoices</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="login-stat-item">
+                    <span class="stat-value">99.9%</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="login-stat-item">
+                    <span class="stat-value">2x</span>
+                    <span class="stat-label">Faster</span>
+                </div>
+            </div>
             <p class="login-footer-text">&copy; 2026 Kosha. Engineered for performance.</p>
         </div>
     </div>
@@ -60,7 +101,7 @@
         <div class="login-card">
 
             <!-- App Logo Badge -->
-            <div class="login-app-icon" aria-label="Kosha logo">K</div>
+            <img src="assets/img/Kosha.svg" alt="Kosha logo" class="login-app-icon" />
 
             <!-- Mode Tabs (Sign In / Sign Up) -->
             <div class="auth-tabs" role="tablist">
