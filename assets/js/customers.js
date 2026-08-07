@@ -20,7 +20,7 @@ let searchQuery    = '';
 let filterStatus   = '';
 let sortOrder      = 'created_at_desc';
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initCustomersPage() {
     await requireAuth();
     initLayout('customers');
     initApp();
@@ -28,7 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadCustomers();
     await loadStats();
     handleURLActions();
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initCustomersPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initCustomersPage);
+}
 
 // ── URL Actions ────────────────────────────────────────────────
 function handleURLActions() {

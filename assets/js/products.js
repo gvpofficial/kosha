@@ -18,7 +18,7 @@ let sortOrder     = 'created_at_desc';
 let viewMode      = 'table';
 let pagination    = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initProductsPage() {
     await requireAuth();
     initLayout('products');
     initApp();
@@ -28,7 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadProductStats();
     handleURLActions();
     document.getElementById('confirm-delete-product-btn')?.addEventListener('click', confirmDeleteProduct);
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initProductsPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initProductsPage);
+}
 
 function handleURLActions() {
     const params = new URLSearchParams(window.location.search);

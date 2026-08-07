@@ -22,14 +22,16 @@ let itemRowCount     = 0;
 let autoSaveTimer    = null;
 
 // ── Init ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initInvoicePage() {
     await requireAuth();
     initLayout('invoices');
     initApp();
     initFlatpickr();
     await loadInitialData();
     setupCustomerSearch();
-    addItemRow(); // default first row
+    if (document.querySelectorAll('.item-row').length === 0) {
+        addItemRow(); // default first row
+    }
     setupAutoSave();
     initSignatureUpload();
 

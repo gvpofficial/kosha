@@ -1,0 +1,21 @@
+{
+    "name": "Kosha — Invoice Management",
+    "short_name": "Kosha",
+    "description": "Professional invoice management with real-time analytics, customer tracking, and GST compliance.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#050811",
+    "theme_color": "#1065FF",
+    "icons": [
+        {
+            "src": "assets/img/Kosha.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "assets/img/Kosha.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

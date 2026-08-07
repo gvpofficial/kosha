@@ -4,10 +4,15 @@
  * Call: initLayout('dashboard') — pass current page id.
  */
 
+import { initSPARouter } from './spaRouter.js';
+
 export function initLayout(activePage = '') {
-    injectSidebar(activePage);
-    injectTopbar();
-    injectOverlay();
+    if (!document.getElementById('sidebar')) {
+        injectSidebar(activePage);
+        injectTopbar();
+        injectOverlay();
+    }
+    initSPARouter();
 }
 
 const navItems = [

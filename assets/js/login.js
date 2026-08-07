@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initAuthPage();
+    init3DTilt();
     initParticleCanvas();
 });
 
@@ -31,6 +32,14 @@ function initAuthPage() {
     const successEl      = document.getElementById('auth-success');
     const successTitle   = document.getElementById('auth-success-title');
     const successText    = document.getElementById('auth-success-text');
+
+    // Verification overlay elements
+    const verifyOverlay  = document.getElementById('verification-overlay');
+    const voTitle        = document.getElementById('vo-title');
+    const voMessage      = document.getElementById('vo-message');
+    const voEmail        = document.getElementById('vo-email');
+    const voResendBtn    = document.getElementById('vo-resend-btn');
+    const voBackBtn      = document.getElementById('vo-back-btn');
 
     let lastAttemptedEmail = '';
 
@@ -107,7 +116,7 @@ function initAuthPage() {
         if (error) {
             const msg = error.message || '';
             if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('unconfirmed')) {
-                showAlert('Your email address has not been verified yet.', true);
+                showVerificationOverlay(email, 'unverified');
             } else {
                 showAlert(msg || 'Login failed. Please check your credentials.', false);
             }
@@ -164,14 +173,10 @@ function initAuthPage() {
             showSuccess('Account created!', 'Redirecting to dashboard…');
             setTimeout(() => { window.location.replace('dashboard.html'); }, 1200);
         } else {
-            showSuccess(
-                '📧 Verification Email Sent!',
-                `We have sent a confirmation link to ${email}. Please check your inbox (and spam folder) and click the link to activate your account before signing in.`
-            );
             signupForm.reset();
             const signinEmail = document.getElementById('signin-email');
             if (signinEmail) signinEmail.value = email;
-            setTimeout(() => switchTab('signin'), 3000);
+            showVerificationOverlay(email, 'post-signup');
         }
     });
 
@@ -258,6 +263,75 @@ function initAuthPage() {
     }
     function hideSuccess() { successEl.classList.remove('show'); }
 
+    // ── Verification Overlay ──────────────────────────────
+    function showVerificationOverlay(email, mode) {
+        hideAlert(); hideSuccess();
+        // Hide forms and tabs
+        signinForm.classList.remove('active');
+        signupForm.classList.remove('active');
+        forgotPanel.classList.remove('active');
+        tabSigninBtn.classList.remove('active');
+        tabSignupBtn.classList.remove('active');
+        document.querySelector('.auth-tabs').style.display = 'none';
+        document.querySelector('.forms-container').style.display = 'none';
+        const termsNotice = document.querySelector('.auth-terms-notice');
+        if (termsNotice) termsNotice.style.display = 'none';
+
+        // Set content based on mode
+        if (mode === 'post-signup') {
+            voTitle.textContent = 'Check Your Email';
+            voMessage.textContent = "We've sent a verification link to";
+        } else {
+            voTitle.textContent = 'Email Verification Required';
+            voMessage.textContent = 'Please verify your email before signing in.';
+        }
+        voEmail.textContent = email;
+        voResendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Resend Verification Email';
+        voResendBtn.classList.remove('sent');
+        voResendBtn.disabled = false;
+        verifyOverlay.classList.add('active');
+    }
+
+    function hideVerificationOverlay() {
+        verifyOverlay.classList.remove('active');
+        document.querySelector('.auth-tabs').style.display = '';
+        document.querySelector('.forms-container').style.display = '';
+        const termsNotice = document.querySelector('.auth-terms-notice');
+        if (termsNotice) termsNotice.style.display = '';
+        switchTab('signin');
+    }
+
+    // ── Verification Overlay Buttons ──────────────────────
+    voBackBtn?.addEventListener('click', () => {
+        hideVerificationOverlay();
+    });
+
+    voResendBtn?.addEventListener('click', async () => {
+        const email = voEmail.textContent;
+        if (!email || email === 'user@email.com') return;
+
+        voResendBtn.disabled = true;
+        voResendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email
+        });
+
+        if (error) {
+            voResendBtn.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Failed — Try Again';
+            voResendBtn.disabled = false;
+        } else {
+            voResendBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Email Sent!';
+            voResendBtn.classList.add('sent');
+            setTimeout(() => {
+                voResendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Resend Verification Email';
+                voResendBtn.classList.remove('sent');
+                voResendBtn.disabled = false;
+            }, 4000);
+        }
+    });
+
     function setLoading(btnId, loading) {
         const btn = document.getElementById(btnId);
         if (!btn) return;
@@ -269,6 +343,66 @@ function initAuthPage() {
             btn.disabled = false;
         }
     }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  3D PERSPECTIVE TILT & INTERACTIVE EFFECTS
+// ════════════════════════════════════════════════════════════════
+function init3DTilt() {
+    // ── Main Login Card Tilt ──────────────────────────────
+    const loginCard = document.getElementById('login-card');
+    if (loginCard) {
+        loginCard.addEventListener('mousemove', (e) => {
+            const rect = loginCard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Update CSS variables for ambient light reflection
+            loginCard.style.setProperty('--card-mouse-x', `${x}px`);
+            loginCard.style.setProperty('--card-mouse-y', `${y}px`);
+            
+            // Calculate tilt angle (max 8 degrees)
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const tiltX = -((y - centerY) / centerY) * 8;
+            const tiltY = ((x - centerX) / centerX) * 8;
+            
+            loginCard.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px)`;
+        });
+        
+        loginCard.addEventListener('mouseleave', () => {
+            loginCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+            loginCard.style.setProperty('--card-mouse-x', '50%');
+            loginCard.style.setProperty('--card-mouse-y', '50%');
+        });
+    }
+
+    // ── Feature Cards Tilt ────────────────────────────────
+    const featureCards = document.querySelectorAll('.feature-card.card-3d');
+    featureCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+            
+            // Calculate tilt angle (max 10 degrees)
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const tiltX = -((y - centerY) / centerY) * 10;
+            const tiltY = ((x - centerX) / centerX) * 10;
+            
+            card.style.transform = `translateY(-6px) perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+            card.style.setProperty('--mouse-x', '50%');
+            card.style.setProperty('--mouse-y', '50%');
+        });
+    });
 }
 
 // ════════════════════════════════════════════════════════════════

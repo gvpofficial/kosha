@@ -18,14 +18,20 @@ let filterFrom      = '';
 let filterTo        = '';
 let selectedIds     = new Set();
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initInvoicesPage() {
     await requireAuth();
     initLayout('invoices');
     initApp();
     initFilters();
     await loadInvoices();
     await loadStatusCounts();
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initInvoicesPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initInvoicesPage);
+}
 
 // ── Filters ────────────────────────────────────────────────────
 function initFilters() {

@@ -12,7 +12,7 @@ import { initLayout } from './layout.js';
 let currentUser = null;
 let logoFile    = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initSettingsPage() {
     await requireAuth();
     initLayout('settings');
     initApp();
@@ -20,7 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadAllSettings();
     initLogoUpload();
     checkTheme();
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initSettingsPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initSettingsPage);
+}
 
 // ── Tab Navigation ────────────────────────────────────────────
 window.showTab = function(tab) {

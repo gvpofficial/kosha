@@ -11,12 +11,18 @@ let currentPeriod = 'this_year';
 let fromDate = '';
 let toDate = '';
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initReportsPage() {
     await requireAuth();
     initLayout('reports');
     initApp();
     await loadReportData();
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initReportsPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initReportsPage);
+}
 
 // ── Period ─────────────────────────────────────────────────────
 window.changePeriod = function(period) {

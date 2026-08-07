@@ -9,7 +9,7 @@ import { initLayout } from './layout.js';
 let revenueChart = null;
 let statusChart  = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initDashboardPage() {
     await requireAuth();
     initLayout('dashboard');
     initApp();
@@ -23,7 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Refresh
     document.getElementById('refresh-dashboard-btn')?.addEventListener('click', () => loadDashboard());
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initDashboardPage();
+} else {
+    document.addEventListener('DOMContentLoaded', initDashboardPage);
+}
 
 async function loadDashboard() {
     await Promise.all([

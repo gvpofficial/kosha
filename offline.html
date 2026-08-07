@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline — Kosha</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: #050811; color: #F8FAFC;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .offline-container {
+            text-align: center; padding: 2rem; max-width: 420px;
+        }
+        .offline-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem; font-size: 2rem; color: #FBBF24;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        h1 {
+            font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+        p {
+            font-size: 0.95rem; color: #94A3B8; line-height: 1.6; margin-bottom: 2rem;
+        }
+        .retry-btn {
+            padding: 0.75rem 2rem; font-size: 0.875rem; font-weight: 700;
+            background: linear-gradient(135deg, #1065FF, #06B6D4);
+            color: #fff; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(16, 101, 255, 0.35);
+        }
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(16, 101, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">&#x1F4F6;</div>
+        <h1>You're Offline</h1>
+        <p>Please check your internet connection. The app will automatically reconnect when your network is available.</p>
+        <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+    </div>
+</body>
+</html>
