@@ -2,7 +2,7 @@
  * Kosha - Products Page Logic
  */
 
-import { requireAuth, getProducts, createProduct, updateProduct, deleteProduct, getLowStockProducts } from './supabase.js';
+import { requireAuth, getProducts, createProduct, updateProduct, deleteProduct, getLowStockProducts, logActivity } from './supabase.js';
 import { initApp, formatCurrency, debounce, Pagination, Toast } from './app.js';
 import { initLayout } from './layout.js';
 
@@ -30,11 +30,15 @@ export async function initProductsPage() {
     document.getElementById('confirm-delete-product-btn')?.addEventListener('click', confirmDeleteProduct);
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initProductsPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initProductsPage);
+export function cleanupProductsPage() {
+    pagination = null;
+    editingId = null;
+    deleteTargetId = null;
+    allProducts = [];
+    allProductsById = {};
 }
+
+
 
 function handleURLActions() {
     const params = new URLSearchParams(window.location.search);
@@ -136,7 +140,7 @@ function renderTableView(products) {
             <td>
                 <div class="d-flex gap-1">
                     <button class="row-action-btn" onclick="openEditProduct('${p.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                    <a href="invoice.html" class="row-action-btn" title="Add to invoice"><i class="fa-solid fa-file-plus"></i></a>
+                    <a href="#/invoice" class="row-action-btn" title="Add to invoice"><i class="fa-solid fa-file-plus"></i></a>
                     <button class="row-action-btn danger" onclick="promptDeleteProduct('${p.id}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             </td>
@@ -252,6 +256,11 @@ window.saveProduct = async function() {
     if (result.error) { Toast.error('Save failed.'); return; }
     bootstrap.Modal.getOrCreateInstance(document.getElementById('productModal')).hide();
     Toast.success(editingId ? 'Product updated!' : 'Product added!');
+
+    // Log activity
+    const productId = editingId || result.data?.id;
+    await logActivity('product', productId, editingId ? 'product_updated' : 'product_created', `Product ${name} ${editingId ? 'updated' : 'added'}`);
+
     await loadProducts();
     await loadProductStats();
 };
@@ -264,10 +273,13 @@ window.promptDeleteProduct = function(id) {
 
 async function confirmDeleteProduct() {
     if (!deleteTargetId) return;
+    const prod = allProducts.find(p => p.id === deleteTargetId);
+    const prodName = prod ? prod.name : '';
     const { error } = await deleteProduct(deleteTargetId);
     bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteProductModal')).hide();
     if (error) { Toast.error('Delete failed.'); return; }
     Toast.success('Product deleted.');
+    await logActivity('product', deleteTargetId, 'product_deleted', `Product ${prodName} deleted`);
     deleteTargetId = null;
     await loadProducts();
     await loadProductStats();

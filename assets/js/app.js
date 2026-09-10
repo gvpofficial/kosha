@@ -8,6 +8,106 @@ import { getCurrentUser, signOut, getBusinessProfile } from './supabase.js';
 // ────────────────────────────────────────────────────────────────
 // APP INIT — call on every page after layout is injected
 // ────────────────────────────────────────────────────────────────
+// ── Load global translation helper ───────────────────────────────
+window.translateFAToLucide = function() {
+    const faToLucideMap = {
+        'fa-gauge': 'layout-dashboard',
+        'fa-file-invoice': 'receipt',
+        'fa-users': 'users',
+        'fa-box': 'box',
+        'fa-chart-bar': 'bar-chart-2',
+        'fa-gear': 'settings',
+        'fa-plus': 'plus',
+        'fa-rotate-right': 'rotate-cw',
+        'fa-indian-rupee-sign': 'indian-rupee',
+        'fa-clock': 'clock',
+        'fa-bell': 'bell',
+        'fa-moon': 'moon',
+        'fa-sun': 'sun',
+        'fa-right-from-bracket': 'log-out',
+        'fa-user': 'user',
+        'fa-trash': 'trash-2',
+        'fa-trash-can': 'trash-2',
+        'fa-pen': 'pencil',
+        'fa-check': 'check',
+        'fa-download': 'download',
+        'fa-magnifying-glass': 'search',
+        'fa-bars': 'menu',
+        'fa-menu': 'menu',
+        'fa-x': 'x',
+        'fa-bolt': 'zap',
+        'fa-pencil': 'pencil',
+        'fa-file-plus': 'file-plus',
+        'fa-user-plus': 'user-plus',
+        'fa-box-open': 'box',
+        'fa-chart-line': 'trending-up',
+        'fa-arrow-left': 'arrow-left',
+        'fa-chevron-left': 'chevron-left',
+        'fa-chevron-right': 'chevron-right',
+        'fa-circle-check': 'check-circle',
+        'fa-circle-xmark': 'x-circle',
+        'fa-triangle-exclamation': 'alert-triangle',
+        'fa-circle-info': 'info',
+        'fa-file-pdf': 'file-text',
+        'fa-file-csv': 'file-spreadsheet',
+        'fa-file-import': 'upload',
+        'fa-file-export': 'download',
+        'fa-ellipsis-vertical': 'more-vertical',
+        'fa-eye': 'eye',
+        'fa-eye-slash': 'eye-off',
+        'fa-lock': 'lock',
+        'fa-key': 'key',
+        'fa-envelope': 'mail',
+        'fa-phone': 'phone',
+        'fa-map-marker-alt': 'map-pin',
+        'fa-building': 'building',
+        'fa-credit-card': 'credit-card',
+        'fa-calendar': 'calendar',
+        'fa-filter': 'filter',
+        'fa-search': 'search'
+    };
+
+    document.querySelectorAll('i[class*="fa-"]').forEach(el => {
+        let faClass = null;
+        for (const cls of el.classList) {
+            if (cls.startsWith('fa-') && cls !== 'fa-solid' && cls !== 'fa-regular' && cls !== 'fa-brands') {
+                faClass = cls;
+                break;
+            }
+        }
+        if (faClass) {
+            const lucideName = faToLucideMap[faClass] || faClass.replace('fa-', '');
+            el.setAttribute('data-lucide', lucideName);
+            el.classList.remove('fa-solid', 'fa-regular', 'fa-brands', faClass);
+        }
+    });
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+};
+
+// Set up MutationObserver to auto-translate dynamically inserted elements
+if (typeof window.translateObserver === 'undefined') {
+    let timeout = null;
+    window.translateObserver = new MutationObserver((mutations) => {
+        let hasAdditions = false;
+        for (const m of mutations) {
+            if (m.addedNodes.length > 0) {
+                hasAdditions = true;
+                break;
+            }
+        }
+        if (hasAdditions) {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                window.translateFAToLucide();
+            }, 50);
+        }
+    });
+    window.translateObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 export function initApp() {
     initDarkMode();
     initSidebarToggle();
@@ -15,6 +115,8 @@ export function initApp() {
     loadUserInfo();
     setPageTitle();
     initGlobalSearch();
+    initGlobalParticleCanvas();
+    window.translateFAToLucide();
 }
 
 // ── Dark Mode ────────────────────────────────────────────────────
@@ -31,65 +133,88 @@ function initDarkMode() {
 
     const updateIcon = () => {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        if (btn) btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        if (icon) {
+            icon.removeAttribute('class'); // Safe for both HTML and SVG elements
+            icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            if (window.lucide) {
+                window.lucide.createIcons();
+            } else {
+                icon.setAttribute('class', isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon');
+            }
+        }
+        if (btn) {
+            const tooltipText = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+            btn.setAttribute('aria-label', tooltipText);
+            btn.setAttribute('title', tooltipText);
+        }
     };
     updateIcon();
 
-    btn?.addEventListener('click', () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const next = isDark ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        lsSet('kosha_theme', next);
-        updateIcon();
-    });
+    if (btn && !btn._dmListener) {
+        btn._dmListener = true;
+        btn.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const next = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            lsSet('kosha_theme', next);
+            updateIcon();
+        });
+    }
 }
 
 // ── Sidebar Toggle ───────────────────────────────────────────────
 function initSidebarToggle() {
-    const sidebar       = document.getElementById('sidebar');
-    const mainContent   = document.getElementById('main-content');
-    const toggleBtn     = document.getElementById('sidebar-toggle');
+    const mobileNav     = document.getElementById('topbar-nav');
     const mobileBtn     = document.getElementById('mobile-menu-toggle');
+    const closeBtn      = document.getElementById('mobile-nav-close');
     const overlay       = document.getElementById('sidebar-overlay');
 
-    if (!sidebar) return;
+    if (!mobileNav) return;
 
-    // Restore saved state
-    const collapsed = lsGet('kosha_sidebar_collapsed') === 'true';
-    if (collapsed) sidebar.classList.add('collapsed');
+    // Mobile toggle open
+    if (mobileBtn && !mobileBtn._mbListener) {
+        mobileBtn._mbListener = true;
+        mobileBtn.addEventListener('click', () => {
+            const open = mobileNav.classList.toggle('mobile-open');
+            overlay?.classList.toggle('show', open);
+            mobileBtn.setAttribute('aria-expanded', open);
+        });
+    }
 
-    // Desktop toggle
-    toggleBtn?.addEventListener('click', () => {
-        const isCollapsed = sidebar.classList.toggle('collapsed');
-        lsSet('kosha_sidebar_collapsed', isCollapsed);
-        const icon = toggleBtn.querySelector('i');
-        if (icon) icon.className = isCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
-        toggleBtn.setAttribute('aria-expanded', !isCollapsed);
-    });
-
-    // Mobile toggle
-    mobileBtn?.addEventListener('click', () => {
-        const open = sidebar.classList.toggle('mobile-open');
-        overlay?.classList.toggle('show', open);
-        mobileBtn.setAttribute('aria-expanded', open);
-    });
+    // Mobile toggle close
+    if (closeBtn && !closeBtn._closeListener) {
+        closeBtn._closeListener = true;
+        closeBtn.addEventListener('click', () => {
+            mobileNav.classList.remove('mobile-open');
+            overlay?.classList.remove('show');
+            mobileBtn?.setAttribute('aria-expanded', 'false');
+        });
+    }
 
     // Close on overlay click
-    overlay?.addEventListener('click', () => {
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('show');
-        mobileBtn?.setAttribute('aria-expanded', 'false');
-    });
+    if (overlay && !overlay._ovListener) {
+        overlay._ovListener = true;
+        overlay.addEventListener('click', () => {
+            mobileNav.classList.remove('mobile-open');
+            overlay.classList.remove('show');
+            mobileBtn?.setAttribute('aria-expanded', 'false');
+        });
+    }
 }
 
 // ── Logout ───────────────────────────────────────────────────────
 function initLogout() {
     document.querySelectorAll('[data-action="logout"]').forEach(el => {
+        if (el._lgListener) return;
+        el._lgListener = true;
         el.addEventListener('click', async (e) => {
             e.preventDefault();
             await signOut();
-            window.location.href = 'login.html';
+            if (typeof window.navigateTo === 'function') {
+                window.navigateTo('login');
+            } else {
+                window.location.hash = '#/login';
+            }
         });
     });
 }
@@ -125,11 +250,19 @@ function setPageTitle() {
 // ── Global Search ─────────────────────────────────────────────────
 function initGlobalSearch() {
     const searchInput = document.getElementById('global-search');
-    if (!searchInput) return;
+    if (!searchInput || searchInput._gsListener) return;
+    searchInput._gsListener = true;
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const q = searchInput.value.trim();
-            if (q) window.location.href = `invoices.html?search=${encodeURIComponent(q)}`;
+            if (q) {
+                const target = `#/invoices?search=${encodeURIComponent(q)}`;
+                if (typeof window.navigateTo === 'function') {
+                    window.navigateTo(target);
+                } else {
+                    window.location.hash = target;
+                }
+            }
         }
     });
 }
@@ -389,4 +522,88 @@ export function exportCustomersCSV(customers) {
 /** Confirm dialog helper */
 export function confirmDialog(message) {
     return new Promise(resolve => resolve(window.confirm(message)));
+}
+
+let appParticleFrameId = null;
+function initGlobalParticleCanvas() {
+    if (window._particleCanvasInitialized) return;
+    
+    const canvas = document.getElementById('app-particle-canvas');
+    if (!canvas) return;
+    
+    window._particleCanvasInitialized = true;
+    const ctx = canvas.getContext('2d');
+
+    let resizeHandler = function resize() {
+        if (!canvas.parentElement) return;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+    resizeHandler();
+    window.addEventListener('resize', resizeHandler);
+
+    const particles = [];
+    const count = 75; // Increased density from 45 to 75
+
+    for (let i = 0; i < count; i++) {
+        const rand = Math.random();
+        let colorStr = 'rgba(255, 255, 255,'; // Pure white/sparkling stars
+        if (rand < 0.35) {
+            colorStr = 'rgba(16, 101, 255,'; // Brand primary blue stars
+        } else if (rand < 0.7) {
+            colorStr = 'rgba(23, 230, 174,'; // Accent green stars
+        }
+
+        particles.push({
+            x: Math.random() * (window.innerWidth || 1000),
+            y: Math.random() * (window.innerHeight || 800),
+            vx: (Math.random() - 0.5) * 0.45,
+            vy: (Math.random() - 0.5) * 0.45,
+            radius: Math.random() * 2.5 + 1.5, // Increased size from 2+1 to 2.5+1.5
+            alpha: Math.random() * 0.5 + 0.35, // Increased opacity from 0.4+0.15 to 0.5+0.35
+            color: colorStr
+        });
+    }
+
+    function animate() {
+        if (!document.getElementById('app-particle-canvas')) return; // stop animating if element is gone
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < count; i++) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y < 0 || p.y > h) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `${p.color}${p.alpha})`;
+            ctx.fill();
+
+            // Connect nearby particles
+            for (let j = i + 1; j < count; j++) {
+                const p2 = particles[j];
+                const dx = p.x - p2.x;
+                const dy = p.y - p2.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(16, 101, 255, ${0.22 * (1 - dist / 130)})`; // Increased stroke opacity from 0.12 to 0.22
+                    ctx.lineWidth = 0.65; // Increased line width from 0.5 to 0.65
+                    ctx.stroke();
+                }
+            }
+        }
+
+        appParticleFrameId = requestAnimationFrame(animate);
+    }
+
+    animate();
 }

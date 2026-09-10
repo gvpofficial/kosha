@@ -2,7 +2,7 @@
  * Kosha - Invoices List Page Logic
  */
 
-import { requireAuth, getInvoices, deleteInvoice, updateInvoiceStatus, getInvoiceStats } from './supabase.js';
+import { requireAuth, getInvoices, deleteInvoice, updateInvoiceStatus, getInvoiceStats, logActivity } from './supabase.js';
 import { initApp, formatCurrency, formatDate, getStatusBadge, debounce, Pagination, Toast } from './app.js';
 import { initLayout } from './layout.js';
 
@@ -27,11 +27,13 @@ export async function initInvoicesPage() {
     await loadStatusCounts();
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initInvoicesPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initInvoicesPage);
+export function cleanupInvoicesPage() {
+    selectedIds.clear();
+    pagination = null;
+    allInvoices = [];
 }
+
+
 
 // ── Filters ────────────────────────────────────────────────────
 function initFilters() {
@@ -109,7 +111,7 @@ function renderTable(invoices) {
         const checked = selectedIds.has(inv.id);
         return `<tr class="${overdue ? 'row-overdue' : ''}">
             <td><input type="checkbox" class="invoice-row-check" data-id="${inv.id}" ${checked ? 'checked' : ''} onchange="toggleRowSelect('${inv.id}',this.checked)" aria-label="Select invoice ${esc(inv.invoice_number)}" /></td>
-            <td><a href="invoice.html?id=${inv.id}" class="fw-600" style="color:var(--primary);">${esc(inv.invoice_number)}</a></td>
+            <td><a href="#/invoice?id=${inv.id}" class="fw-600" style="color:var(--primary);">${esc(inv.invoice_number)}</a></td>
             <td data-label="Customer">${esc(inv.customer_name || '—')}</td>
             <td data-label="Type"><span class="kosha-badge badge-draft" style="font-size:.7rem;">${(inv.invoice_type || 'invoice').toUpperCase()}</span></td>
             <td data-label="Date">${formatDate(inv.invoice_date)}</td>
@@ -118,7 +120,7 @@ function renderTable(invoices) {
             <td data-label="Status">${getStatusBadge(inv.status)}</td>
             <td>
                 <div class="d-flex gap-1 align-items-center">
-                    <a href="invoice.html?id=${inv.id}" class="row-action-btn" title="Edit" style="color:var(--text-muted);background:none;border:none;cursor:pointer;padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.875rem;"><i class="fa-solid fa-pen"></i></a>
+                    <a href="#/invoice?id=${inv.id}" class="row-action-btn" title="Edit" style="color:var(--text-muted);background:none;border:none;cursor:pointer;padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.875rem;"><i class="fa-solid fa-pen"></i></a>
                     ${inv.status !== 'paid' ? `<button class="row-action-btn" onclick="markInvoicePaid('${inv.id}')" title="Mark as Paid" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.875rem;"><i class="fa-solid fa-check"></i></button>` : ''}
                     <button class="row-action-btn" onclick="downloadInvoicePDF('${inv.id}')" title="Download" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.875rem;"><i class="fa-solid fa-download"></i></button>
                     <button class="row-action-btn danger" onclick="confirmDeleteInvoice('${inv.id}')" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.875rem;"><i class="fa-solid fa-trash"></i></button>
@@ -140,28 +142,34 @@ function updateFooter(invoices, total) {
 async function loadStatusCounts() {
     const { data: stats } = await getInvoiceStats();
     if (!stats) return;
-    const map = { draft: stats.draft_count, sent: stats.sent_count, pending: stats.pending_count, paid: stats.paid_count, overdue: stats.overdue_count, cancelled: stats.cancelled_count || 0 };
+    const map = { all: stats.total_count, draft: stats.draft_count, sent: stats.sent_count, pending: stats.pending_count, paid: stats.paid_count, overdue: stats.overdue_count, cancelled: stats.cancelled_count || 0 };
     Object.entries(map).forEach(([k, v]) => { const el = document.getElementById(`cnt-${k}`); if (el) el.textContent = v || 0; });
 }
 
 // ── Actions ────────────────────────────────────────────────────
 window.markInvoicePaid = async function(id) {
+    const inv = allInvoices.find(i => i.id === id);
+    const invNum = inv ? inv.invoice_number : '';
     const { error } = await updateInvoiceStatus(id, 'paid');
     if (error) { Toast.error('Failed to update status.'); return; }
     Toast.success('Marked as paid!');
+    await logActivity('payment', id, 'invoice_paid', `Invoice ${invNum} marked as paid`);
     loadInvoices(); loadStatusCounts();
 };
 
 window.confirmDeleteInvoice = async function(id) {
     if (!confirm('Delete this invoice? This cannot be undone.')) return;
+    const inv = allInvoices.find(i => i.id === id);
+    const invNum = inv ? inv.invoice_number : '';
     const { error } = await deleteInvoice(id);
     if (error) { Toast.error('Delete failed.'); return; }
     Toast.success('Invoice deleted.');
+    await logActivity('invoice', id, 'invoice_deleted', `Invoice ${invNum} deleted`);
     loadInvoices(); loadStatusCounts();
 };
 
 window.downloadInvoicePDF = function(id) {
-    window.open(`invoice.html?id=${id}&print=1`, '_blank');
+    if (window.navigateTo) window.navigateTo(`#/invoice?id=${id}&print=1`); else window.location.hash = `#/invoice?id=${id}&print=1`;
 };
 
 // ── Bulk Select ────────────────────────────────────────────────
@@ -192,8 +200,15 @@ window.bulkMarkPaid = async function() {
     const ids = [...selectedIds];
     let ok = 0, fail = 0;
     await Promise.all(ids.map(async (id) => {
+        const inv = allInvoices.find(i => i.id === id);
+        const invNum = inv ? inv.invoice_number : '';
         const { error } = await updateInvoiceStatus(id, 'paid');
-        error ? fail++ : ok++;
+        if (error) {
+            fail++;
+        } else {
+            ok++;
+            await logActivity('payment', id, 'invoice_paid', `Invoice ${invNum} marked as paid`);
+        }
     }));
     if (ok) Toast.success(`${ok} invoice(s) marked as paid.`);
     if (fail) Toast.error(`${fail} failed.`);
@@ -207,8 +222,13 @@ window.bulkDelete = async function() {
     const ids = [...selectedIds];
     let ok = 0;
     await Promise.all(ids.map(async (id) => {
+        const inv = allInvoices.find(i => i.id === id);
+        const invNum = inv ? inv.invoice_number : '';
         const { error } = await deleteInvoice(id);
-        if (!error) ok++;
+        if (!error) {
+            ok++;
+            await logActivity('invoice', id, 'invoice_deleted', `Invoice ${invNum} deleted`);
+        }
     }));
     Toast.success(`${ok} invoice(s) deleted.`);
     clearBulkSelect();

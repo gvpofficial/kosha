@@ -187,14 +187,12 @@
 /* ─── Sticky Action Bar ──────────────────────────────────────── */
 .invoice-action-bar {
     position: fixed; bottom: 0;
-    left: var(--sidebar-width); right: 0;
+    left: 0; right: 0;
     background: var(--card); border-top: 1px solid var(--border);
     padding: .875rem 1.5rem;
     display: flex; align-items: center; gap: .625rem; flex-wrap: wrap;
     z-index: 200; box-shadow: 0 -4px 16px rgba(0,0,0,.08);
-    transition: left .3s ease;
 }
-.sidebar.collapsed ~ .main-content .invoice-action-bar { left: var(--sidebar-collapsed); }
 
 /* ─── Customer Autocomplete ──────────────────────────────────── */
 .autocomplete-wrapper { position: relative; }
@@ -307,4 +305,180 @@
     .template-grid { grid-template-columns: repeat(3, 1fr); }
     .invoice-action-bar { left: 0 !important; }
     .items-table { min-width: 700px; }
+}
+
+/* ─── Status Filter Tabs (List Page) ─────────────────────────── */
+.invoice-status-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap; /* Prevent wrapping on mobile, scroll horizontally */
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+    -webkit-overflow-scrolling: touch;
+}
+.invoice-status-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+}
+
+.status-tab {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.45rem 0.875rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.status-tab:hover {
+    background: var(--card-hover);
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+}
+
+.status-tab.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-full);
+    background: rgba(16, 101, 255, 0.08);
+    color: var(--primary);
+    min-width: 18px;
+    height: 18px;
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.status-tab:hover .tab-count {
+    background: rgba(16, 101, 255, 0.15);
+}
+
+.status-tab.active .tab-count {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+/* Overdue and Cancelled badge customizations for tabs */
+#tab-overdue .tab-count {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+}
+#tab-overdue.active .tab-count {
+    background: var(--danger);
+    color: #ffffff;
+}
+#tab-overdue.active {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+#tab-cancelled .tab-count {
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--text-muted);
+}
+#tab-cancelled.active .tab-count {
+    background: #6B7280;
+    color: #ffffff;
+}
+#tab-cancelled.active {
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--text-primary);
+    border-color: #6B7280;
+}
+
+@media (min-width: 768px) {
+    .invoice-status-tabs {
+        flex-wrap: wrap; /* Allow tabs to wrap on wider tablet/desktop screens */
+        overflow-x: visible;
+    }
+}
+
+/* ─── Filter & Search Toolbar Icon Styles ─────────────────────── */
+
+/* 1. Date Picker Native Indicator Styling (Lucide Calendar Override) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>');
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B949E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>');
+    opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* 2. Custom input-group-text styling to match theme inputs */
+.input-group-text {
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border) !important;
+    border-right: none !important;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--primary) !important;
+    color: var(--primary);
+}
+
+/* 3. Reusable btn-outline-secondary custom styling with proper contrast */
+.btn-outline-secondary {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.btn-outline-secondary:active, .btn-outline-secondary.active {
+    background: var(--primary-light) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+/* 4. Increase sizes of icons inside the filter card toolbar specifically */
+.filter-toolbar .btn i, 
+.filter-toolbar .btn svg {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.filter-toolbar .input-group-text i,
+.filter-toolbar .input-group-text svg {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 1rem;
+    color: var(--text-muted);
 }

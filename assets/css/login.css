@@ -2,13 +2,35 @@
    KOSHA - Login Page Styles (GVP Official Theme — 3D Redesign)
    ============================================================ */
 
-html, body {
+/* Scoped to .login-page so dashboard backgrounds aren't overridden */
+body.login-page {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: #050811;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #050811 !important;
     color: #F8FAFC;
+}
+
+/* SPA auth container — acts as the full-page wrapper */
+body.login-page #spa-auth-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex !important;
+    background: #050811;
+    position: relative;
+}
+
+/* The login wrapper inside spa-auth-container */
+.login-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    background: #050811;
+    overflow: hidden;
+    position: relative;
+    perspective: 1200px;
 }
 
 .login-page {
@@ -407,8 +429,8 @@ html, body {
 }
 
 .hero-title {
-    font-family: 'Encode Sans Expanded', 'Inter', sans-serif;
-    font-size: 3rem; font-weight: 800;
+    font-family: var(--font-bold);
+    font-size: 3rem; font-weight: normal;
     letter-spacing: -0.03em; line-height: 1.1;
     margin: 0 0 1.25rem 0; color: #FFFFFF;
     text-align: left;
@@ -589,8 +611,8 @@ html, body {
     display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; text-align: left;
 }
 .stat-value {
-    font-family: 'Encode Sans Expanded', 'Inter', sans-serif;
-    font-size: 1.35rem; font-weight: 800; color: #FFFFFF;
+    font-family: var(--font-bold);
+    font-size: 1.35rem; font-weight: normal; color: #FFFFFF;
     letter-spacing: -0.02em;
 }
 .stat-label {
@@ -767,9 +789,9 @@ html, body {
 }
 
 .card-header-title {
-    font-family: 'Encode Sans Expanded', 'Inter', sans-serif;
+    font-family: var(--font-bold);
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: normal;
     color: #F8FAFC;
     margin: 0 0 0.3rem 0;
     letter-spacing: -0.02em;
@@ -1087,8 +1109,8 @@ input[type="text"].form-control {
 }
 
 .vo-title {
-    font-family: 'Encode Sans Expanded', 'Inter', sans-serif;
-    font-size: 1.3rem; font-weight: 800; color: #F8FAFC;
+    font-family: var(--font-bold);
+    font-size: 1.3rem; font-weight: normal; color: #F8FAFC;
     margin: 0 0 0.5rem 0;
 }
 
@@ -1151,7 +1173,8 @@ input[type="text"].form-control {
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 860px) {
-    .login-page {
+    .login-page,
+    .login-wrapper {
         flex-direction: column;
         perspective: none;
         height: auto;
@@ -1194,6 +1217,7 @@ input[type="text"].form-control {
         to {
             opacity: 1;
             transform: translateY(0);
+        }
     }
 }
 

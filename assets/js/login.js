@@ -1,21 +1,37 @@
-/**
- * Kosha - Authentication Logic & Animated Particle Background
- */
+import { getCurrentUser, signInWithEmail, signUpWithEmail, supabase } from './supabase.js';
 
-import { signInWithEmail, signUpWithEmail, getCurrentUser, supabase } from './supabase.js';
+let animFrameId = null;
+let resizeHandler = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+export async function initLoginPage() {
     // Redirect if already authenticated
     const user = await getCurrentUser();
     if (user) {
-        window.location.replace('dashboard.html');
+        if (typeof window.navigateTo === 'function') {
+            window.navigateTo('dashboard', { replaceState: true });
+        } else {
+            window.location.hash = '#/dashboard';
+        }
         return;
     }
 
     initAuthPage();
     init3DTilt();
     initParticleCanvas();
-});
+}
+
+export function cleanupLoginPage() {
+    if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+    }
+    if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
+        resizeHandler = null;
+    }
+}
+
+
 
 function initAuthPage() {
     const tabSigninBtn   = document.getElementById('tab-signin-btn');
@@ -129,7 +145,11 @@ function initAuthPage() {
             localStorage.removeItem('kosha_remember_email');
         }
 
-        window.location.replace('dashboard.html');
+        if (typeof window.navigateTo === 'function') {
+            window.navigateTo('dashboard', { replaceState: true });
+        } else {
+            window.location.hash = '#/dashboard';
+        }
     });
 
     // ── 2. CREATE ACCOUNT SUBMIT ───────────────────────────
@@ -171,7 +191,13 @@ function initAuthPage() {
 
         if (data?.session) {
             showSuccess('Account created!', 'Redirecting to dashboard…');
-            setTimeout(() => { window.location.replace('dashboard.html'); }, 1200);
+            setTimeout(() => {
+                if (typeof window.navigateTo === 'function') {
+                    window.navigateTo('dashboard', { replaceState: true });
+                } else {
+                    window.location.hash = '#/dashboard';
+                }
+            }, 1200);
         } else {
             signupForm.reset();
             const signinEmail = document.getElementById('signin-email');
@@ -413,14 +439,14 @@ function initParticleCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    function resize() {
+    resizeHandler = function resize() {
         if (!canvas.parentElement) return;
         canvas.width = canvas.parentElement.offsetWidth;
         canvas.height = canvas.parentElement.offsetHeight;
-    }
-    resize();
+    };
+    resizeHandler();
 
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resizeHandler);
 
     const particles = [];
     const count = 40;
@@ -473,7 +499,7 @@ function initParticleCanvas() {
             }
         }
 
-        requestAnimationFrame(animate);
+        animFrameId = requestAnimationFrame(animate);
     }
 
     animate();

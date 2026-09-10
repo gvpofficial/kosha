@@ -5,7 +5,7 @@
 /* ─── Quick Actions ──────────────────────────────────────────── */
 .quick-actions-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 .quick-action-btn {
@@ -124,10 +124,13 @@
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 992px) {
-    .quick-actions-row { grid-template-columns: repeat(2, 1fr); }
+    .quick-actions-row { grid-template-columns: repeat(3, 1fr); }
 }
-@media (max-width: 576px) {
-    .quick-actions-row { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+@media (max-width: 768px) {
+    .quick-actions-row { grid-template-columns: repeat(3, 1fr); gap: .75rem; }
     .quick-action-btn { padding: 1.25rem .75rem; font-size: .8125rem; }
     .qa-icon { width: 44px; height: 44px; font-size: 1.1rem; }
+}
+@media (max-width: 576px) {
+    .quick-actions-row { grid-template-columns: minmax(0, 1fr); }
 }

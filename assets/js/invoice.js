@@ -50,11 +50,20 @@ export async function initInvoicePage() {
         }
     });
 
-    // Preview modal → render on open
+// Preview modal → render on open
     document.getElementById('previewModal')?.addEventListener('show.bs.modal', () => {
         renderInvoicePreview();
     });
-});
+}
+
+export function cleanupInvoicePage() {
+    if (autoSaveTimer) {
+        clearInterval(autoSaveTimer);
+        autoSaveTimer = null;
+    }
+    currentInvoiceId = null;
+    itemRowCount = 0;
+}
 
 // ── Flatpickr ────────────────────────────────────────────────────
 function initFlatpickr() {
@@ -214,9 +223,9 @@ window.addItemRow = function() {
                 <option>L</option><option>Set</option><option>Box</option><option>Month</option><option>Year</option>
             </select>
         </td>
-        <td><input type="number" class="form-control item-qty" value="1" min="0.001" step="0.001" style="width:65px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
-        <td><input type="number" class="form-control item-rate" value="0" min="0" step="0.01" style="width:85px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
-        <td><input type="number" class="form-control item-discount" value="0" min="0" max="100" step="0.01" style="width:55px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
+        <td><input type="number" class="form-control item-qty text-end" value="1" min="0.001" step="0.001" style="width:65px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
+        <td><input type="number" class="form-control item-rate text-end" value="0" min="0" step="0.01" style="width:85px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
+        <td><input type="number" class="form-control item-discount text-end" value="0" min="0" max="100" step="0.01" style="width:55px;" oninput="calculateRow(this.closest('tr'));calculateTotals()" /></td>
         <td>
             <select class="form-select item-gst" style="width:60px;" onchange="calculateRow(this.closest('tr'));calculateTotals()">
                 <option value="0">0%</option><option value="5">5%</option><option value="12">12%</option>

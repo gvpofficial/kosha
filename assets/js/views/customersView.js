@@ -1,0 +1,206 @@
+/**
+ * Kosha - Customers View Template
+ */
+
+export function getCustomersHTML() {
+    return `
+    <div class="page-content">
+
+        <nav class="kosha-breadcrumb" aria-label="Breadcrumb">
+            <a href="#/dashboard" class="kosha-breadcrumb-item">Home</a>
+            <span class="kosha-breadcrumb-sep">/</span>
+            <span class="kosha-breadcrumb-item active">Customers</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Customers</h1>
+                <p class="page-subtitle">Manage your customer relationships</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary btn-sm" onclick="importCSVModal()" id="import-csv-btn"><i class="fa-solid fa-file-import"></i> Import CSV</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="exportCustomers()" id="export-csv-btn"><i class="fa-solid fa-file-export"></i> Export</button>
+                <button class="btn btn-primary" onclick="openAddCustomer()" id="add-customer-btn"><i class="fa-solid fa-plus"></i> Add Customer</button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4" id="customer-stats-row">
+            <div class="col-md-4">
+                <div class="stat-card primary" style="padding:1rem;">
+                    <div class="stat-icon bg-primary" style="width:40px;height:40px;margin-bottom:.5rem;"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-value" id="stat-total-customers" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Total Customers</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card success" style="padding:1rem;">
+                    <div class="stat-icon bg-success" style="width:40px;height:40px;margin-bottom:.5rem;"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="stat-value" id="stat-active-customers" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Active Customers</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card warning" style="padding:1rem;">
+                    <div class="stat-icon bg-warning" style="width:40px;height:40px;margin-bottom:.5rem;"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="stat-value" id="stat-new-customers" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">New This Month</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="kosha-card mb-3">
+            <div class="kosha-card-body py-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="search" id="customer-search-input" class="form-control" placeholder="Search name, email, phone…" aria-label="Search customers" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="customer-filter-status" aria-label="Filter by status">
+                            <option value="">All</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="customer-sort" aria-label="Sort customers">
+                            <option value="created_at_desc">Newest First</option>
+                            <option value="created_at_asc">Oldest First</option>
+                            <option value="name_asc">Name A–Z</option>
+                            <option value="name_desc">Name Z–A</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="customer-per-page" aria-label="Items per page">
+                            <option value="10">10 / page</option>
+                            <option value="25" selected>25 / page</option>
+                            <option value="50">50 / page</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <button class="btn btn-ghost btn-sm" onclick="resetFilters()" title="Reset filters"><i class="fa-solid fa-rotate-left"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="kosha-card">
+            <div class="kosha-card-body p-0">
+                <div class="kosha-table-wrapper">
+                    <table class="kosha-table" id="customers-table" aria-label="Customers list">
+                        <thead>
+                            <tr>
+                                <th style="width:44px;"></th>
+                                <th data-sort="name" class="sortable">Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>City</th>
+                                <th>GSTIN</th>
+                                <th>Invoices</th>
+                                <th>Status</th>
+                                <th style="width:100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-tbody">
+                            <!-- Skeleton rows loaded by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty state -->
+                <div id="customers-empty" style="display:none;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="empty-state-title">No customers yet</div>
+                        <div class="empty-state-text">Add your first customer to start managing invoices.</div>
+                        <button class="btn btn-primary" onclick="openAddCustomer()"><i class="fa-solid fa-plus"></i> Add Customer</button>
+                    </div>
+                </div>
+            </div>
+            <div class="kosha-card-footer">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted" id="customers-count-text">Showing 0 customers</small>
+                    <div id="customers-pagination"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ Add/Edit Customer Modal ══ -->
+    <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-modal="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="customerModalLabel">Add Customer</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customer-form" novalidate>
+                        <input type="hidden" id="customer-id" />
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label">Full Name <span class="required">*</span></label><input type="text" id="cf-name" name="name" class="form-control" required /></div>
+                            <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="cf-email" name="email" class="form-control" /></div>
+                            <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" id="cf-phone" name="phone" class="form-control" /></div>
+                            <div class="col-md-6"><label class="form-label">GSTIN</label><input type="text" id="cf-gstin" name="gstin" class="form-control" maxlength="15" /></div>
+                            <div class="col-md-6"><label class="form-label">PAN</label><input type="text" id="cf-pan" name="pan" class="form-control" maxlength="10" /></div>
+                            <div class="col-md-6"><label class="form-label">City</label><input type="text" id="cf-city" name="city" class="form-control" /></div>
+                            <div class="col-md-6"><label class="form-label">State</label><input type="text" id="cf-state" name="state" class="form-control" /></div>
+                            <div class="col-md-6"><label class="form-label">Pincode</label><input type="text" id="cf-pincode" name="pincode" class="form-control" maxlength="10" /></div>
+                            <div class="col-md-6"><label class="form-label">Country</label><input type="text" id="cf-country" name="country" class="form-control" value="India" /></div>
+                            <div class="col-12"><label class="form-label">Address</label><textarea id="cf-address" name="address" class="form-control" rows="2"></textarea></div>
+                            <div class="col-12"><label class="form-label">Notes</label><textarea id="cf-notes" name="notes" class="form-control" rows="2" placeholder="Internal notes…"></textarea></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-customer-btn" onclick="saveCustomer()"><i class="fa-solid fa-check"></i> Save Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Customer Detail Drawer ══ -->
+    <div class="customer-detail-panel" id="customerDetailPanel" aria-hidden="true">
+        <div class="panel-header">
+            <div class="panel-title" id="panel-customer-name">Customer Details</div>
+            <button class="btn btn-ghost btn-sm" onclick="closeDetailPanel()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="panel-body" id="panel-body-content">
+            <div class="panel-avatar" id="panel-avatar">?</div>
+            <div class="panel-customer-info">
+                <div id="panel-email" style="font-size:.875rem;color:var(--text-muted);"></div>
+                <div id="panel-phone" style="font-size:.875rem;color:var(--text-muted);"></div>
+            </div>
+            <div class="panel-stats" id="panel-stats"></div>
+            <div class="panel-invoices-title">Invoice History</div>
+            <div id="panel-invoices-list"></div>
+            <div class="d-flex gap-2 mt-3">
+                <a href="#" id="panel-create-invoice-btn" class="btn btn-primary btn-sm flex-fill"><i class="fa-solid fa-file-plus"></i> Create Invoice</a>
+                <button class="btn btn-outline-secondary btn-sm" id="panel-edit-btn" onclick="editCurrentPanelCustomer()"><i class="fa-solid fa-pen"></i> Edit</button>
+            </div>
+        </div>
+    </div>
+    <div class="panel-backdrop" id="panel-backdrop" onclick="closeDetailPanel()"></div>
+
+    <!-- Delete confirm modal -->
+    <div class="modal fade" id="deleteCustomerModal" tabindex="-1" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Delete Customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body"><p>This action cannot be undone. Customer data will be hidden from your account.</p></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="confirm-delete-customer-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}

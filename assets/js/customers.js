@@ -3,7 +3,7 @@
  */
 
 import {
-    requireAuth, getCustomers, createCustomer, updateCustomer, deleteCustomer, getCustomerInvoices
+    requireAuth, getCustomers, createCustomer, updateCustomer, deleteCustomer, getCustomerInvoices, logActivity
 } from './supabase.js';
 import { initApp, formatCurrency, formatDate, getStatusBadge, getInitials, getAvatarColor, debounce, Pagination, exportCustomersCSV, confirmDialog, Toast, createSkeletonRows } from './app.js';
 import { initLayout } from './layout.js';
@@ -30,11 +30,15 @@ export async function initCustomersPage() {
     handleURLActions();
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initCustomersPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initCustomersPage);
+export function cleanupCustomersPage() {
+    pagination = null;
+    panelCustomer = null;
+    editingId = null;
+    deleteTargetId = null;
+    allCustomers = [];
 }
+
+
 
 // ── URL Actions ────────────────────────────────────────────────
 function handleURLActions() {
@@ -123,7 +127,7 @@ function renderTable(customers) {
                 <div class="d-flex gap-1">
                     <button class="row-action-btn success" onclick="openDetailPanel(allCustomersById['${c.id}'])" title="View history"><i class="fa-solid fa-eye"></i></button>
                     <button class="row-action-btn" onclick="openEditCustomer('${c.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                    <a href="invoice.html?customer=${c.id}" class="row-action-btn" title="New Invoice" onclick="event.stopPropagation();"><i class="fa-solid fa-file-plus"></i></a>
+                    <a href="#/invoice?customer=${c.id}" class="row-action-btn" title="New Invoice" onclick="event.stopPropagation();"><i class="fa-solid fa-file-plus"></i></a>
                     <button class="row-action-btn danger" onclick="promptDeleteCustomer('${c.id}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             </td>
@@ -211,6 +215,11 @@ window.saveCustomer = async function() {
 
     bootstrap.Modal.getOrCreateInstance(document.getElementById('customerModal')).hide();
     Toast.success(editingId ? 'Customer updated!' : 'Customer added!');
+
+    // Log activity
+    const customerId = editingId || result.data?.id;
+    await logActivity('customer', customerId, editingId ? 'customer_updated' : 'customer_created', `Customer ${data.name} ${editingId ? 'updated' : 'added'}`);
+
     await loadCustomers();
 };
 
@@ -222,10 +231,13 @@ window.promptDeleteCustomer = function(id) {
 
 document.getElementById('confirm-delete-customer-btn')?.addEventListener('click', async () => {
     if (!deleteTargetId) return;
+    const cust = allCustomers.find(c => c.id === deleteTargetId);
+    const custName = cust ? cust.name : '';
     const { error } = await deleteCustomer(deleteTargetId);
     bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteCustomerModal')).hide();
     if (error) { Toast.error('Delete failed.'); return; }
     Toast.success('Customer removed.');
+    await logActivity('customer', deleteTargetId, 'customer_deleted', `Customer ${custName} deleted`);
     deleteTargetId = null;
     closeDetailPanel();
     await loadCustomers();
@@ -246,7 +258,7 @@ window.openDetailPanel = async function(customer) {
     setText('panel-edit-btn', 'Edit');
 
     const createInvLink = document.getElementById('panel-create-invoice-btn');
-    if (createInvLink) createInvLink.href = `invoice.html?customer=${customer.id}`;
+    if (createInvLink) createInvLink.href = `#/invoice?customer=${customer.id}`;
 
     // Invoice history
     const panel = document.getElementById('customerDetailPanel');
@@ -272,7 +284,7 @@ window.openDetailPanel = async function(customer) {
     document.getElementById('panel-invoices-list').innerHTML = invs.slice(0, 8).map(inv => `
         <div class="panel-invoice-row">
             <div>
-                <a href="invoice.html?id=${inv.id}" class="panel-invoice-num">${esc(inv.invoice_number)}</a>
+                <a href="#/invoice?id=${inv.id}" class="panel-invoice-num">${esc(inv.invoice_number)}</a>
                 <div style="font-size:.75rem;color:var(--text-muted);">${formatDate(inv.invoice_date)}</div>
             </div>
             <div style="text-align:right;">

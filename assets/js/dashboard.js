@@ -2,7 +2,7 @@
  * Kosha - Dashboard Page Logic
  */
 
-import { requireAuth, getInvoiceStats, getInvoices, getCustomers, getLowStockProducts, getMonthlyTrend, getRevenueByMonth } from './supabase.js';
+import { requireAuth, getInvoiceStats, getInvoices, getCustomers, getLowStockProducts, getMonthlyTrend, getRevenueByMonth, getActivityLogs } from './supabase.js';
 import { initApp, formatCurrency, formatDate, getStatusBadge, getInitials, getAvatarColor, getRelativeTime } from './app.js';
 import { initLayout } from './layout.js';
 
@@ -17,19 +17,34 @@ export async function initDashboardPage() {
     await loadDashboard();
 
     // Year change
-    document.getElementById('revenue-year-select')?.addEventListener('change', async (e) => {
-        await loadRevenueChart(parseInt(e.target.value));
-    });
+    const yearSelect = document.getElementById('revenue-year-select');
+    if (yearSelect && !yearSelect._chListener) {
+        yearSelect._chListener = true;
+        yearSelect.addEventListener('change', async (e) => {
+            await loadRevenueChart(parseInt(e.target.value));
+        });
+    }
 
     // Refresh
-    document.getElementById('refresh-dashboard-btn')?.addEventListener('click', () => loadDashboard());
+    const refreshBtn = document.getElementById('refresh-dashboard-btn');
+    if (refreshBtn && !refreshBtn._rfListener) {
+        refreshBtn._rfListener = true;
+        refreshBtn.addEventListener('click', () => loadDashboard());
+    }
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initDashboardPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initDashboardPage);
+export function cleanupDashboardPage() {
+    if (revenueChart) {
+        revenueChart.destroy();
+        revenueChart = null;
+    }
+    if (statusChart) {
+        statusChart.destroy();
+        statusChart = null;
+    }
 }
+
+
 
 async function loadDashboard() {
     await Promise.all([
@@ -39,16 +54,22 @@ async function loadDashboard() {
         loadRecentInvoices(),
         loadRecentCustomers(),
         loadLowStock(),
+        loadRecentActivity(),
     ]);
 }
 
 // ── Greeting ───────────────────────────────────────────────────
 function setGreeting() {
     const h = new Date().getHours();
+    console.log('setGreeting called, hour:', h);
     const time = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
     const emojis = { morning: '☀️', afternoon: '👋', evening: '🌙' };
     const el = document.getElementById('greeting-text');
-    if (el) el.textContent = `Good ${time}! ${emojis[time]}`;
+    console.log('greeting element:', el);
+    if (el) {
+        el.textContent = `Good ${time}! ${emojis[time]}`;
+        console.log('Greeting updated to:', el.textContent);
+    }
 }
 
 // ── Stats ───────────────────────────────────────────────────────
@@ -199,22 +220,22 @@ async function loadRecentInvoices() {
     const { data } = await getInvoices({}, 1, 5);
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state py-4"><div class="empty-state-icon"><i class="fa-solid fa-file-invoice"></i></div><div class="empty-state-title">No invoices yet</div><div class="empty-state-text">Create your first invoice to get started.</div><a href="invoice.html" class="btn btn-primary btn-sm">Create Invoice</a></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state py-4"><div class="empty-state-icon"><i class="fa-solid fa-file-invoice"></i></div><div class="empty-state-title">No invoices yet</div><div class="empty-state-text">Create your first invoice to get started.</div><a href="#/invoice" class="btn btn-primary btn-sm">Create Invoice</a></div></td></tr>`;
         return;
     }
 
     tbody.innerHTML = data.map(inv => `
         <tr>
-            <td data-label="Invoice #"><a href="invoice.html?id=${inv.id}" class="fw-600 text-primary-color">${inv.invoice_number}</a></td>
+            <td data-label="Invoice #"><a href="#/invoice?id=${inv.id}" class="fw-600 text-primary-color">${inv.invoice_number}</a></td>
             <td data-label="Customer">${escapeHtml(inv.customer_name)}</td>
             <td data-label="Date">${formatDate(inv.invoice_date)}</td>
             <td data-label="Due Date" class="${isOverdue(inv.due_date, inv.status) ? 'text-danger' : ''}">${inv.due_date ? formatDate(inv.due_date) : '—'}</td>
-            <td data-label="Amount" class="fw-600">${formatCurrency(inv.grand_total, inv.currency_symbol)}</td>
+            <td data-label="Amount" class="text-end fw-600">${formatCurrency(inv.grand_total, inv.currency_symbol)}</td>
             <td data-label="Status">${getStatusBadge(inv.status)}</td>
             <td data-label="Actions">
                 <div class="d-flex gap-1">
-                    <a href="invoice.html?id=${inv.id}" class="invoice-action-btn" title="View/Edit"><i class="fa-solid fa-eye"></i></a>
-                    <button class="invoice-action-btn" onclick="window.open('invoice.html?id=${inv.id}&print=1')" title="Download PDF"><i class="fa-solid fa-download"></i></button>
+                    <a href="#/invoice?id=${inv.id}" class="invoice-action-btn" title="View/Edit"><i class="fa-solid fa-eye"></i></a>
+                    <button class="invoice-action-btn" onclick="if(window.navigateTo)window.navigateTo('#/invoice?id=${inv.id}&print=1');else window.location.hash='#/invoice?id=${inv.id}&print=1';" title="Download PDF"><i class="fa-solid fa-download"></i></button>
                 </div>
             </td>
         </tr>
@@ -234,7 +255,7 @@ async function loadRecentCustomers() {
     }
 
     list.innerHTML = data.map(c => `
-        <li class="customer-mini-item" onclick="window.location.href='customers.html?id=${c.id}'" role="button" tabindex="0">
+        <li class="customer-mini-item" onclick="if(window.navigateTo)window.navigateTo('#/customers?id=${c.id}');else window.location.hash='#/customers?id=${c.id}';" role="button" tabindex="0">
             <div class="cust-avatar" style="background:${getAvatarColor(c.name)}">${getInitials(c.name)}</div>
             <div>
                 <div class="cust-name">${escapeHtml(c.name)}</div>
@@ -272,6 +293,89 @@ async function loadLowStock() {
         </li>`;
     }).join('');
 }
+
+function getActivityIconHtml(entityType) {
+    let iconClass = 'fa-solid fa-circle-info';
+    let typeClass = 'invoice'; // fallback
+
+    if (entityType === 'invoice') {
+        iconClass = 'fa-solid fa-file-invoice';
+        typeClass = 'invoice';
+    } else if (entityType === 'customer') {
+        iconClass = 'fa-solid fa-user';
+        typeClass = 'customer';
+    } else if (entityType === 'product') {
+        iconClass = 'fa-solid fa-box';
+        typeClass = 'product';
+    } else if (entityType === 'payment') {
+        iconClass = 'fa-solid fa-indian-rupee-sign';
+        typeClass = 'payment';
+    }
+
+    return `<div class="activity-icon ${typeClass}"><i class="${iconClass}"></i></div>`;
+}
+
+// ── Recent Activity ─────────────────────────────────────────────
+async function loadRecentActivity() {
+    const feed = document.getElementById('activity-feed');
+    if (!feed) return;
+
+    // State 1: Loading (skeleton animation)
+    feed.innerHTML = `
+        <li class="activity-item skeleton-row">
+            <div class="skeleton" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;"></div>
+            <div style="flex:1;"><div class="skeleton skeleton-text" style="width:80%;height:1rem;margin-bottom:0.5rem;"></div><div class="skeleton skeleton-text" style="width:40%;height:0.8rem;"></div></div>
+        </li>
+    `;
+
+    try {
+        const { data, error } = await getActivityLogs(5);
+
+        if (error) throw error;
+
+        // State 2: Success with no data (empty state)
+        if (!data || data.length === 0) {
+            feed.innerHTML = `
+                <div style="padding:2rem 1.5rem; text-align:center; color:var(--text-muted);">
+                    <div style="font-size:1.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="fw-600 text-primary-color" style="font-size:0.9rem; margin-bottom:0.25rem;">No recent activity yet</div>
+                    <p style="font-size:0.8rem; margin:0; line-height:1.4;">Your recent invoices, customers, payments, and other actions will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // State 3: Success with data
+        feed.innerHTML = data.map(item => {
+            const iconHtml = getActivityIconHtml(item.entity_type);
+            const timeStr = getRelativeTime(item.created_at);
+            const descHtml = escapeHtml(item.description || `${item.entity_type} action recorded`);
+
+            return `
+                <li class="activity-item">
+                    ${iconHtml}
+                    <div style="flex:1;">
+                        <div class="activity-desc">${descHtml}</div>
+                        <div class="activity-time">${timeStr}</div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+
+    } catch (err) {
+        // State 4: Error State
+        console.error('Failed to load recent activity:', err);
+        feed.innerHTML = `
+            <div style="padding:2rem 1.5rem; text-align:center; color:var(--text-muted);">
+                <div style="font-size:1.5rem; margin-bottom:0.5rem; color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="fw-600" style="font-size:0.9rem; margin-bottom:0.25rem; color:var(--text-primary);">Unable to load recent activity</div>
+                <p style="font-size:0.8rem; margin-bottom:1rem; line-height:1.4;">Please check your connection and try again.</p>
+                <button class="btn btn-outline-secondary btn-sm" onclick="loadRecentActivity()" style="padding:0.25rem 0.75rem; font-size:0.75rem; font-weight:600;"><i class="fa-solid fa-rotate-right"></i> Retry</button>
+            </div>
+        `;
+    }
+}
+window.loadRecentActivity = loadRecentActivity;
 
 // ── Helpers ─────────────────────────────────────────────────────
 function escapeHtml(str) {

@@ -43,7 +43,11 @@ export async function signOut() {
 export async function requireAuth() {
     const user = await getCurrentUser();
     if (!user) {
-        window.location.href = 'login.html';
+        if (typeof window.navigateTo === 'function') {
+            window.navigateTo('login');
+        } else {
+            window.location.hash = '#/login';
+        }
         return null;
     }
     return user;
@@ -134,22 +138,34 @@ export async function getProducts(search = '', page = 1, perPage = 25, typeFilte
     if (search) {
         query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,hsn_code.ilike.%${search}%`);
     }
-    if (typeFilter) query = query.eq('type', typeFilter);
+    if (typeFilter) query = query.eq('category', typeFilter);
     query = query.order('created_at', { ascending: false }).range((page - 1) * perPage, page * perPage - 1);
     const { data, count, error } = await query;
-    return { data: data || [], count: count || 0, error };
+    const mappedData = (data || []).map(p => ({ ...p, type: p.category || 'product' }));
+    return { data: mappedData, count: count || 0, error };
 }
 
 export async function createProduct(productData) {
     const user = await getCurrentUser();
     if (!user) return { data: null, error: new Error('Not authenticated') };
-    return await supabase.from('products').insert({ ...productData, user_id: user.id }).select().single();
+    const dbPayload = { ...productData, category: productData.type || 'product', user_id: user.id };
+    delete dbPayload.type;
+    const { data, error } = await supabase.from('products').insert(dbPayload).select().single();
+    const mappedData = data ? { ...data, type: data.category || 'product' } : null;
+    return { data: mappedData, error };
 }
 
 export async function updateProduct(id, productData) {
     const user = await getCurrentUser();
     if (!user) return { data: null, error: new Error('Not authenticated') };
-    return await supabase.from('products').update({ ...productData, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', user.id).select().single();
+    const dbPayload = { ...productData, updated_at: new Date().toISOString() };
+    if (dbPayload.type !== undefined) {
+        dbPayload.category = dbPayload.type;
+        delete dbPayload.type;
+    }
+    const { data, error } = await supabase.from('products').update(dbPayload).eq('id', id).eq('user_id', user.id).select().single();
+    const mappedData = data ? { ...data, type: data.category || 'product' } : null;
+    return { data: mappedData, error };
 }
 
 export async function deleteProduct(id) {
@@ -165,11 +181,12 @@ export async function getLowStockProducts() {
         .from('products')
         .select('*')
         .eq('user_id', user.id)
-        .eq('type', 'product')
-        .lte('stock_quantity', 10) // fallback — ideally: .lte('stock_quantity', supabase.raw('low_stock_level'))
+        .eq('category', 'product')
+        .lte('stock_quantity', 10)
         .order('stock_quantity', { ascending: true })
         .limit(10);
-    return { data: data || [], error };
+    const mappedData = (data || []).map(p => ({ ...p, type: p.category || 'product' }));
+    return { data: mappedData, error };
 }
 
 // ── Invoices ─────────────────────────────────────────────────────
@@ -356,4 +373,16 @@ export async function logActivity(entityType, entityId, action, description) {
     } catch (e) {
         // non-critical — silently fail
     }
+}
+
+export async function getActivityLogs(limit = 10) {
+    const user = await getCurrentUser();
+    if (!user) return { data: [], error: new Error('Not authenticated') };
+    const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+    return { data: data || [], error };
 }

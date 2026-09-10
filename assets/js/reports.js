@@ -18,11 +18,14 @@ export async function initReportsPage() {
     await loadReportData();
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initReportsPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initReportsPage);
+export function cleanupReportsPage() {
+    Object.values(charts).forEach(c => {
+        if (c && typeof c.destroy === 'function') c.destroy();
+    });
+    charts = {};
 }
+
+
 
 // ── Period ─────────────────────────────────────────────────────
 window.changePeriod = function(period) {
@@ -259,10 +262,10 @@ function renderOverdueTable(invoices) {
         return;
     }
     tbody.innerHTML = overdue.map(inv => `<tr>
-        <td><a href="invoice.html?id=${inv.id}" style="color:var(--primary);font-weight:600;">${esc(inv.invoice_number)}</a></td>
+        <td><a href="#/invoice?id=${inv.id}" style="color:var(--primary);font-weight:600;">${esc(inv.invoice_number)}</a></td>
         <td>${esc(inv.customer_name || '—')}</td>
         <td style="color:var(--danger);">${formatDate(inv.due_date)}</td>
-        <td class="fw-600">${formatCurrency(inv.grand_total, inv.currency_symbol)}</td>
+        <td class="text-end fw-600">${formatCurrency(inv.grand_total, inv.currency_symbol)}</td>
         <td>${getStatusBadge(inv.status)}</td>
     </tr>`).join('');
 }

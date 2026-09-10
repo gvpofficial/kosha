@@ -22,11 +22,12 @@ export async function initSettingsPage() {
     checkTheme();
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initSettingsPage();
-} else {
-    document.addEventListener('DOMContentLoaded', initSettingsPage);
+export function cleanupSettingsPage() {
+    currentUser = null;
+    logoFile = null;
 }
+
+
 
 // ── Tab Navigation ────────────────────────────────────────────
 window.showTab = function(tab) {

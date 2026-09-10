@@ -1,0 +1,208 @@
+/**
+ * Kosha - Products View Template
+ */
+
+export function getProductsHTML() {
+    return `
+    <div class="page-content">
+
+        <nav class="kosha-breadcrumb" aria-label="Breadcrumb">
+            <a href="#/dashboard" class="kosha-breadcrumb-item">Home</a>
+            <span class="kosha-breadcrumb-sep">/</span>
+            <span class="kosha-breadcrumb-item active">Products</span>
+        </nav>
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Products &amp; Services</h1>
+                <p class="page-subtitle">Manage your catalog for quick invoice creation</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary btn-sm" onclick="exportProducts()" id="export-products-btn"><i class="fa-solid fa-file-export"></i> Export</button>
+                <button class="btn btn-primary" onclick="openAddProduct()" id="add-product-btn"><i class="fa-solid fa-plus"></i> Add Product</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card primary" style="padding:1rem;">
+                    <div class="stat-icon bg-primary" style="width:36px;height:36px;margin-bottom:.5rem;"><i class="fa-solid fa-box"></i></div>
+                    <div class="stat-value" id="stat-total-products" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success" style="padding:1rem;">
+                    <div class="stat-icon bg-success" style="width:36px;height:36px;margin-bottom:.5rem;"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="stat-value" id="stat-active-products" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card warning" style="padding:1rem;">
+                    <div class="stat-icon bg-warning" style="width:36px;height:36px;margin-bottom:.5rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-value" id="stat-low-stock" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Low Stock</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card danger" style="padding:1rem;">
+                    <div class="stat-icon bg-danger" style="width:36px;height:36px;margin-bottom:.5rem;"><i class="fa-solid fa-ban"></i></div>
+                    <div class="stat-value" id="stat-out-of-stock" style="font-size:1.5rem;">—</div>
+                    <div class="stat-label">Out of Stock</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="kosha-card mb-3">
+            <div class="kosha-card-body py-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <input type="search" id="product-search" class="form-control" placeholder="Search products, SKU, HSN…" aria-label="Search products" />
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="product-filter-type" aria-label="Filter by type">
+                            <option value="">All Types</option>
+                            <option value="product">Product</option>
+                            <option value="service">Service</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="product-sort" aria-label="Sort">
+                            <option value="created_at_desc">Newest</option>
+                            <option value="name_asc">Name A–Z</option>
+                            <option value="price_asc">Price ↑</option>
+                            <option value="price_desc">Price ↓</option>
+                            <option value="stock_asc">Stock ↑</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="product-view-mode" aria-label="View mode">
+                            <option value="table">Table View</option>
+                            <option value="card">Card View</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="kosha-card" id="products-table-view">
+            <div class="kosha-card-body p-0">
+                <div class="kosha-table-wrapper">
+                    <table class="kosha-table" id="products-table" aria-label="Products list">
+                        <thead>
+                            <tr>
+                                <th>Name &amp; SKU</th>
+                                <th>Type</th>
+                                <th>HSN</th>
+                                <th>Unit</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">GST%</th>
+                                <th class="text-center">Stock</th>
+                                <th>Status</th>
+                                <th style="width:100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="products-empty" style="display:none;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fa-solid fa-box-open"></i></div>
+                        <div class="empty-state-title">No products yet</div>
+                        <div class="empty-state-text">Add your products and services for faster invoicing.</div>
+                        <button class="btn btn-primary" onclick="openAddProduct()"><i class="fa-solid fa-plus"></i> Add Product</button>
+                    </div>
+                </div>
+            </div>
+            <div class="kosha-card-footer">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted" id="products-count-text">0 products</small>
+                    <div id="products-pagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card View -->
+        <div id="products-card-view" style="display:none;">
+            <div class="row g-3" id="products-cards-row"></div>
+        </div>
+
+    </div>
+
+    <!-- ══ Add/Edit Product Modal ══ -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-modal="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="productModalLabel">Add Product</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="product-form" novalidate>
+                        <input type="hidden" id="product-id" />
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Product/Service Type</label>
+                                <div class="doc-type-group">
+                                    <button type="button" class="doc-type-btn active" data-ptype="product">Product</button>
+                                    <button type="button" class="doc-type-btn" data-ptype="service">Service</button>
+                                </div>
+                                <input type="hidden" id="pf-type" value="product" />
+                            </div>
+                            <div class="col-md-8"><label class="form-label">Name <span class="required">*</span></label><input type="text" id="pf-name" class="form-control" required /></div>
+                            <div class="col-md-4"><label class="form-label">SKU / Code</label><input type="text" id="pf-sku" class="form-control" placeholder="SKU-001" /></div>
+                            <div class="col-12"><label class="form-label">Description</label><textarea id="pf-description" class="form-control" rows="2"></textarea></div>
+                            <div class="col-md-4"><label class="form-label">Price <span class="required">*</span></label><input type="number" id="pf-price" class="form-control" min="0" step="0.01" required /></div>
+                            <div class="col-md-4">
+                                <label class="form-label">GST Rate</label>
+                                <select class="form-select" id="pf-tax-rate">
+                                    <option value="0">0% — Exempt</option>
+                                    <option value="5">5%</option>
+                                    <option value="12">12%</option>
+                                    <option value="18" selected>18%</option>
+                                    <option value="28">28%</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4"><label class="form-label">HSN / SAC Code</label><input type="text" id="pf-hsn" class="form-control" /></div>
+                            <div class="col-md-4">
+                                <label class="form-label">Unit</label>
+                                <select class="form-select" id="pf-unit">
+                                    <option value="Nos">Nos</option><option value="Hr">Hour</option><option value="Kg">Kg</option>
+                                    <option value="m">Meter</option><option value="L">Litre</option>
+                                    <option value="Set">Set</option><option value="Box">Box</option>
+                                    <option value="Month">Month</option><option value="Year">Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4"><label class="form-label">Stock Quantity</label><input type="number" id="pf-stock" class="form-control" min="0" step="1" value="0" /></div>
+                            <div class="col-md-4"><label class="form-label">Low Stock Alert At</label><input type="number" id="pf-low-stock-level" class="form-control" min="0" step="1" value="5" /></div>
+                            <div class="col-md-4"><label class="form-label">Discount %</label><input type="number" id="pf-discount" class="form-control" min="0" max="100" step="0.01" value="0" /></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-product-btn" onclick="saveProduct()"><i class="fa-solid fa-check"></i> Save Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirm -->
+    <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Delete Product</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body"><p>Delete this product? This cannot be undone.</p></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="confirm-delete-product-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}
